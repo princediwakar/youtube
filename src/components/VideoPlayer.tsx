@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeProps } from 'react-youtube';
-import { domains, Question } from '../data/mockBrain';
-import { useStore } from '../store/useStore';
-import QuizOverlay from './QuizOverlay';
+import { domains, Question } from '@/data/mockBrain';
+import { useStore } from '@/store/useStore';
+import QuizOverlay from '@/components/QuizOverlay';
 
 export default function VideoPlayer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,7 +89,7 @@ export default function VideoPlayer() {
         iframeClassName="w-full h-full"
       />
       {currentQuestion && (
-        <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-10 flex items-center justify-center p-6">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-xl z-10 flex items-center justify-center p-6 animate-fade-in transition-all duration-500">
           <QuizOverlay 
             question={currentQuestion} 
             onPass={() => handleQuizPass(currentQuestion.id)} 

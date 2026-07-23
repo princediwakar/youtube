@@ -1,5 +1,5 @@
-import '../tailwind.css'
-import ThemeWrapper from '../components/ThemeWrapper'
+import '@/tailwind.css'
+import ThemeWrapper from '@/components/ThemeWrapper'
 
 export const metadata = {
   title: 'ZenTuber',
