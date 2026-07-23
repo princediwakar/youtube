@@ -507,7 +507,7 @@ const App = ()=>{
         };
         if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
         ;
-        await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`${BASE_URL}/search?part=snippet&maxResults=6&key=${API_KEY}&q=${query}`).then((response)=>{
+        await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`${BASE_URL}/search?part=snippet&maxResults=12&key=${API_KEY}&q=${query}`).then((response)=>{
             const videoResults = response.data.items.filter((item)=>item.id.kind === "youtube#video");
             setLoadingProgress(80);
             setVideos(videoResults);
@@ -518,8 +518,33 @@ const App = ()=>{
             handleMockData();
         });
     };
+    const aiKeywords = [
+        'agentic ai workflows',
+        'autonomous ai agents',
+        'large language models',
+        'prompt engineering techniques',
+        'retrieval augmented generation',
+        'gpt-4 applications',
+        'machine learning tutorials',
+        'deep learning crash course',
+        'open source ai models',
+        'artificial general intelligence',
+        'ai software engineering',
+        'agentic workflows in production',
+        'designing machine learning systems',
+        'deploying large language models',
+        'llm evaluation and metrics',
+        'operationalizing llms',
+        'vector databases and embeddings',
+        'fine tuning llms in production',
+        'mlops and ai engineering',
+        'streaming machine learning data',
+        'ai product manager',
+        'director of product management'
+    ];
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        fetchVideos('learn react');
+        const randomKeyword = aiKeywords[Math.floor(Math.random() * aiKeywords.length)];
+        fetchVideos(randomKeyword);
     }, []);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "flex flex-col w-full h-screen bg-gray-100 antialiased",
@@ -528,7 +553,7 @@ const App = ()=>{
                 handleSubmit: fetchVideos
             }, void 0, false, {
                 fileName: "[project]/src/App.js",
-                lineNumber: 90,
+                lineNumber: 116,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$top$2d$loading$2d$bar$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -537,7 +562,7 @@ const App = ()=>{
                 color: "red"
             }, void 0, false, {
                 fileName: "[project]/src/App.js",
-                lineNumber: 91,
+                lineNumber: 117,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -547,7 +572,7 @@ const App = ()=>{
                         video: selectedVideo
                     }, void 0, false, {
                         fileName: "[project]/src/App.js",
-                        lineNumber: 98,
+                        lineNumber: 124,
                         columnNumber: 27
                     }, ("TURBOPACK compile-time value", void 0)),
                     videos && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$VideosList$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["VideosList"], {
@@ -555,19 +580,19 @@ const App = ()=>{
                         handleClick: playVideoOnClick
                     }, void 0, false, {
                         fileName: "[project]/src/App.js",
-                        lineNumber: 100,
+                        lineNumber: 126,
                         columnNumber: 20
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/App.js",
-                lineNumber: 97,
+                lineNumber: 123,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/src/App.js",
-        lineNumber: 89,
+        lineNumber: 115,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };

@@ -63,7 +63,7 @@ export const App = () => {
     }
 
     await axios
-      .get(`${BASE_URL}/search?part=snippet&maxResults=6&key=${API_KEY}&q=${query}`)
+      .get(`${BASE_URL}/search?part=snippet&maxResults=12&key=${API_KEY}&q=${query}`)
       .then(response => {
         const videoResults = response.data.items.filter(item => item.id.kind === "youtube#video")
         setLoadingProgress(80)
@@ -79,8 +79,34 @@ export const App = () => {
         handleMockData()
       })
   }
+  const aiKeywords = [
+    'agentic ai workflows',
+    'autonomous ai agents',
+    'large language models',
+    'prompt engineering techniques',
+    'retrieval augmented generation',
+    'gpt-4 applications',
+    'machine learning tutorials',
+    'deep learning crash course',
+    'open source ai models',
+    'artificial general intelligence',
+    'ai software engineering',
+    'agentic workflows in production',
+    'designing machine learning systems',
+    'deploying large language models',
+    'llm evaluation and metrics',
+    'operationalizing llms',
+    'vector databases and embeddings',
+    'fine tuning llms in production',
+    'mlops and ai engineering',
+    'streaming machine learning data',
+    'ai product manager',
+    'director of product management'
+  ];
+
   useEffect(() => {
-    fetchVideos('learn react')
+    const randomKeyword = aiKeywords[Math.floor(Math.random() * aiKeywords.length)];
+    fetchVideos(randomKeyword)
   }, [])
 
 

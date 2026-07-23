@@ -545,7 +545,7 @@ var App = function App() {
                         ;
                         return [
                             4,
-                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("".concat(BASE_URL, "/search?part=snippet&maxResults=6&key=").concat(API_KEY, "&q=").concat(query)).then(function(response) {
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("".concat(BASE_URL, "/search?part=snippet&maxResults=12&key=").concat(API_KEY, "&q=").concat(query)).then(function(response) {
                                 var videoResults = response.data.items.filter(function(item) {
                                     return item.id.kind === "youtube#video";
                                 });
@@ -567,9 +567,34 @@ var App = function App() {
             });
         })();
     };
+    var aiKeywords = [
+        'agentic ai workflows',
+        'autonomous ai agents',
+        'large language models',
+        'prompt engineering techniques',
+        'retrieval augmented generation',
+        'gpt-4 applications',
+        'machine learning tutorials',
+        'deep learning crash course',
+        'open source ai models',
+        'artificial general intelligence',
+        'ai software engineering',
+        'agentic workflows in production',
+        'designing machine learning systems',
+        'deploying large language models',
+        'llm evaluation and metrics',
+        'operationalizing llms',
+        'vector databases and embeddings',
+        'fine tuning llms in production',
+        'mlops and ai engineering',
+        'streaming machine learning data',
+        'ai product manager',
+        'director of product management'
+    ];
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "App.useEffect": function() {
-            fetchVideos('learn react');
+            var randomKeyword = aiKeywords[Math.floor(Math.random() * aiKeywords.length)];
+            fetchVideos(randomKeyword);
         }
     }["App.useEffect"], []);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -579,7 +604,7 @@ var App = function App() {
                 handleSubmit: fetchVideos
             }, void 0, false, {
                 fileName: "[project]/src/App.js",
-                lineNumber: 90,
+                lineNumber: 116,
                 columnNumber: 7
             }, _this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$top$2d$loading$2d$bar$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -588,7 +613,7 @@ var App = function App() {
                 color: "red"
             }, void 0, false, {
                 fileName: "[project]/src/App.js",
-                lineNumber: 91,
+                lineNumber: 117,
                 columnNumber: 7
             }, _this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -598,7 +623,7 @@ var App = function App() {
                         video: selectedVideo
                     }, void 0, false, {
                         fileName: "[project]/src/App.js",
-                        lineNumber: 98,
+                        lineNumber: 124,
                         columnNumber: 27
                     }, _this),
                     videos && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$VideosList$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["VideosList"], {
@@ -606,19 +631,19 @@ var App = function App() {
                         handleClick: playVideoOnClick
                     }, void 0, false, {
                         fileName: "[project]/src/App.js",
-                        lineNumber: 100,
+                        lineNumber: 126,
                         columnNumber: 20
                     }, _this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/App.js",
-                lineNumber: 97,
+                lineNumber: 123,
                 columnNumber: 7
             }, _this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/App.js",
-        lineNumber: 89,
+        lineNumber: 115,
         columnNumber: 5
     }, _this);
 };
