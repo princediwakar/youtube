@@ -5,7 +5,7 @@ import YouTube, { YouTubeProps } from 'react-youtube';
 import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import QuizOverlay from '@/components/QuizOverlay';
-import { Play, AlertTriangle, RefreshCw, BrainCircuit } from 'lucide-react';
+import { Play, Pause, AlertTriangle, RefreshCw, BrainCircuit, Maximize } from 'lucide-react';
 
 export default function VideoPlayer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,9 +16,17 @@ export default function VideoPlayer() {
   const [hasStarted, setHasStarted] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [fallbackMode, setFallbackMode] = useState(false);
+  const [autoStartCountdown, setAutoStartCountdown] = useState(4);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Custom Control State
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   // If in fallback mode, use a safe video ID
-  const videoId = fallbackMode ? 'PkZNo7MFNFg' : (currentSyllabus?.videoId || 'PkZNo7MFNFg');
+  const videoId = fallbackMode ? 'zjkBMFhNj_g' : (currentSyllabus?.videoId || 'zjkBMFhNj_g');
   const mockQuestions = currentSyllabus?.questions || [];
 
   // Polling for video time
@@ -26,9 +34,13 @@ export default function VideoPlayer() {
     if (isFlowMode || currentQuestion || !hasStarted) return;
 
     const interval = setInterval(async () => {
-      if (playerRef.current) {
+      if (playerRef.current && isPlaying) {
         const time = await playerRef.current.getCurrentTime();
         if (time !== undefined) {
+          const vidDuration = await playerRef.current.getDuration();
+          if (vidDuration && vidDuration !== duration) setDuration(vidDuration);
+          if (vidDuration) setProgress((time / vidDuration) * 100);
+
           // Trigger transition slightly earlier for the fade effect
           const matchingQuestion = mockQuestions.find(
             (q) => !answeredQuestions.has(q.id) && time >= q.timestamp - 2 && time < q.timestamp
@@ -54,10 +66,16 @@ export default function VideoPlayer() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isFlowMode, currentQuestion, answeredQuestions, mockQuestions, hasStarted]);
+  }, [isFlowMode, currentQuestion, answeredQuestions, mockQuestions, hasStarted, isPlaying, duration]);
 
   const onReady: YouTubeProps['onReady'] = (event: any) => {
     playerRef.current = event.target;
+    setIsPlayerReady(true);
+  };
+
+  const onStateChange: YouTubeProps['onStateChange'] = (event: any) => {
+    if (event.data === 1) setIsPlaying(true);
+    else if (event.data === 2 || event.data === 0) setIsPlaying(false);
   };
 
   const onError: YouTubeProps['onError'] = () => {
@@ -70,6 +88,17 @@ export default function VideoPlayer() {
       playerRef.current.playVideo();
     }
   };
+
+  // Auto-start countdown logic
+  useEffect(() => {
+    if (hasStarted || hasError || !isPlayerReady) return;
+    if (autoStartCountdown <= 0) {
+      handleStartSession();
+      return;
+    }
+    const timer = setTimeout(() => setAutoStartCountdown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [autoStartCountdown, hasStarted, hasError, isPlayerReady]);
 
   const handleFallback = () => {
     setFallbackMode(true);
@@ -101,6 +130,31 @@ export default function VideoPlayer() {
     }
   };
 
+  const togglePlay = () => {
+    if (!playerRef.current) return;
+    if (isPlaying) playerRef.current.pauseVideo();
+    else playerRef.current.playVideo();
+  };
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newProgress = parseFloat(e.target.value);
+    const newTime = (newProgress / 100) * duration;
+    if (playerRef.current) {
+      playerRef.current.seekTo(newTime, true);
+      setProgress(newProgress);
+    }
+  };
+
   const opts: YouTubeProps['opts'] = {
     height: '100%',
     width: '100%',
@@ -108,19 +162,71 @@ export default function VideoPlayer() {
       autoplay: fallbackMode ? 1 : 0,
       modestbranding: 1,
       rel: 0,
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      iv_load_policy: 3
     },
   };
 
   return (
-    <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl bg-black border border-slate-700 group">
-      <YouTube 
-        videoId={videoId} 
-        opts={opts} 
-        onReady={onReady} 
-        onError={onError}
-        className="w-full h-full"
-        iframeClassName="w-full h-full"
-      />
+    <div ref={containerRef} className="relative w-full aspect-video group bg-black">
+      <div className="absolute inset-0 pointer-events-none">
+        <YouTube 
+          videoId={videoId} 
+          opts={opts} 
+          onReady={onReady} 
+          onStateChange={onStateChange}
+          onError={onError}
+          className="w-full h-full pointer-events-auto"
+          iframeClassName="w-full h-full"
+        />
+      </div>
+
+      {/* Custom Controls Overlay */}
+      {hasStarted && !hasError && !currentQuestion && (
+        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 flex flex-col justify-end">
+          <div className="relative w-full h-2 bg-slate-800/80 rounded-full mb-4 cursor-pointer overflow-hidden backdrop-blur-sm group/scrub">
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              step="0.1"
+              value={progress}
+              onChange={handleSeek}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
+            {/* Progress Fill */}
+            <div 
+              className="absolute top-0 left-0 h-full bg-[var(--color-theme-primary)] rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+            {/* Checkpoint Markers */}
+            {duration > 0 && mockQuestions.map(q => (
+              <div 
+                key={q.id}
+                className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full shadow-[0_0_8px_var(--color-theme-primary)] transition-colors ${answeredQuestions.has(q.id) ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                style={{ left: `${(q.timestamp / duration) * 100}%` }}
+              />
+            ))}
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={togglePlay}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors"
+            >
+              {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+            </button>
+            <button 
+              onClick={toggleFullScreen}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors"
+            >
+              <Maximize className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mission Briefing Overlay */}
       {!hasStarted && !hasError && (
@@ -146,7 +252,7 @@ export default function VideoPlayer() {
               className="w-full py-4 px-6 rounded-2xl bg-[var(--color-theme-primary)] hover:bg-[var(--color-theme-primary-hover)] text-slate-950 font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_var(--color-theme-primary)] flex items-center justify-center gap-2 cursor-pointer"
             >
               <Play className="w-5 h-5 fill-current" />
-              Initialize Neural Link
+              Start Learning Session ({autoStartCountdown})
             </button>
           </div>
         </div>

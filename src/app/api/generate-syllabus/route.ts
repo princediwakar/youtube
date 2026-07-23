@@ -56,9 +56,44 @@ export async function POST(req: Request) {
       return NextResponse.json(GOLDEN_PATHS[normalizedQuery]);
     }
 
-    // 1. Search YouTube for the best educational video
-    const searchResult = await ytSearch(query + " course OR tutorial");
-    const topVideo = searchResult.videos[0];
+    // 0. Check if the query is actually a direct YouTube URL
+    let explicitVideoId = null;
+    const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const match = query.match(ytRegex);
+    if (match && match[1]) {
+      explicitVideoId = match[1];
+      console.log(`Detected direct YouTube URL. Extracting ID: ${explicitVideoId}`);
+    }
+
+    let topVideo;
+
+    if (explicitVideoId) {
+      // If a URL was provided, bypass search and mock a topVideo object
+      topVideo = { videoId: explicitVideoId, title: "Custom Video URL" };
+    } else {
+      // 1. Search YouTube for the best educational video
+      // Append negative keywords to filter out regional content and force English
+      const advancedQuery = `${query} (course OR tutorial) English -hindi -urdu`;
+      const searchResult = await ytSearch(advancedQuery);
+      
+      // Filter out common mega-channels that dominate tech searches if the user wants diverse/western creators
+      const excludedChannels = ['apnacollege', 'chaiaurcode', 'simplilearn', 'edureka', 'codewithharry', 'telusko', 'krishnaik', 'geeksforgeeks', 'programmingwithmosh', 'freecodecamp'];
+      
+      topVideo = searchResult.videos.find(video => {
+        // Strip all whitespace from the channel name to make the match foolproof against spacing
+        const channelName = (video.author?.name?.toLowerCase() || '').replace(/\s+/g, '');
+        const title = (video.title?.toLowerCase() || '').replace(/\s+/g, '');
+        const rawTitle = video.title?.toLowerCase() || '';
+        
+        // Skip if channel name is in our exclusion list
+        if (excludedChannels.some(excluded => channelName.includes(excluded))) return false;
+        // Skip if title explicitly mentions hindi
+        if (rawTitle.includes('hindi') || rawTitle.includes('urdu') || rawTitle.includes('telugu') || rawTitle.includes('tamil')) return false;
+        
+        return true;
+      }) || searchResult.videos[0]; // fallback to first if all are filtered out
+    }
+
 
     if (!topVideo) {
       return NextResponse.json({ error: 'No video found for this query' }, { status: 404 });

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
-import { CheckCircle2, Zap } from 'lucide-react';
+import { CheckCircle2, Zap, HelpCircle } from 'lucide-react';
 import TutorMode from './TutorMode';
 
 interface QuizOverlayProps {
@@ -17,15 +17,33 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
   const [answer, setAnswer] = useState('');
   const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
 
+  const handleOptionSelect = (value: string) => {
+    if (status !== 'idle') return;
+    setAnswer(value);
+    const isCorrect = value === question.correctAnswer;
+    if (isCorrect) {
+      setStatus('correct');
+      incrementMastery();
+      setTimeout(() => onPass(), 1500);
+    } else {
+      setStatus('wrong');
+      setIsTutorModeActive(true);
+    }
+  };
+
+  const handleDecodeRequest = () => {
+    if (status !== 'idle') return;
+    setAnswer("User requested insight card");
+    setStatus('wrong');
+    setIsTutorModeActive(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (question.type === 'mcq') return; // Handled by handleOptionSelect
     
     let isCorrect = false;
-    if (question.type === 'mcq') {
-      isCorrect = answer === question.correctAnswer;
-    } else {
-      isCorrect = answer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
-    }
+    isCorrect = answer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
 
     if (isCorrect) {
       setStatus('correct');
@@ -36,6 +54,20 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
       setIsTutorModeActive(true);
     }
   };
+
+  useEffect(() => {
+    if (status !== 'idle' || isTutorModeActive || question.type !== 'mcq' || !question.options) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = parseInt(e.key);
+      if (!isNaN(key) && key >= 1 && key <= question.options!.length) {
+        handleOptionSelect((key - 1).toString());
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [status, isTutorModeActive, question]);
 
   const handleReturnToQuiz = () => {
     setIsTutorModeActive(false);
@@ -58,8 +90,8 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
       status === 'correct' ? 'border-emerald-500/50 shadow-[0_0_40px_rgba(16,185,129,0.3)]' : 'border-slate-700/50 hover:border-slate-600 animate-slide-up'
     }`}>
       {/* Decorative Glow */}
-      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 blur-3xl opacity-20 pointer-events-none transition-colors duration-500 ${
-        status === 'correct' ? 'bg-emerald-500' : 'bg-[var(--color-theme-primary)]'
+      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-64 blur-[100px] opacity-30 pointer-events-none transition-colors duration-1000 ${
+        status === 'correct' ? 'bg-emerald-500 scale-150' : 'bg-[var(--color-theme-primary)]'
       }`} />
 
       <div className="relative z-10 flex justify-between items-start mb-8">
@@ -67,12 +99,21 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
           <Zap className="w-4 h-4 text-[var(--color-theme-primary)]" />
           Concept Check
         </h3>
-        <button 
-          onClick={onSkip}
-          className="text-xs px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all border border-white/5 hover:border-white/10 font-medium"
-        >
-          Skip / I know this
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleDecodeRequest}
+            className="flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-[var(--color-theme-primary)]/10 text-[var(--color-theme-primary)] hover:bg-[var(--color-theme-primary)]/20 transition-all font-bold border border-[var(--color-theme-primary)]/20 shadow-[0_0_15px_var(--color-theme-glow)]"
+          >
+            <HelpCircle className="w-3 h-3" />
+            Decode
+          </button>
+          <button 
+            onClick={onSkip}
+            className="text-xs px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all border border-white/5 hover:border-white/10 font-medium"
+          >
+            Skip
+          </button>
+        </div>
       </div>
 
       <p className="relative z-10 text-2xl md:text-3xl font-bold text-white mb-8 leading-tight tracking-tight">
@@ -84,31 +125,19 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
           {question.type === 'mcq' && question.options && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {question.options.map((opt, i) => (
-                <label 
-                  key={i} 
-                  className={`flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
-                    answer === i.toString() 
-                      ? 'border-[var(--color-theme-primary)] bg-[var(--color-theme-primary)]/10 shadow-[0_0_20px_var(--color-theme-glow)] scale-[1.02]' 
-                      : 'border-slate-800 bg-slate-900/50 hover:border-slate-600 hover:bg-slate-800 hover:scale-[1.01]'
-                  }`}
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleOptionSelect(i.toString())}
+                  className="flex items-center p-6 rounded-2xl border border-slate-700/50 bg-slate-900/40 backdrop-blur-md hover:border-[var(--color-theme-primary)]/50 hover:bg-[var(--color-theme-primary)]/5 transition-all duration-300 text-left group hover:scale-[1.02] shadow-xl hover:shadow-[0_0_25px_var(--color-theme-glow)] cursor-pointer focus:outline-none"
                 >
-                  <input
-                    type="radio"
-                    name="answer"
-                    value={i.toString()}
-                    checked={answer === i.toString()}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    className="hidden"
-                  />
-                  <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center transition-colors ${
-                    answer === i.toString() ? 'border-[var(--color-theme-primary)]' : 'border-slate-600'
-                  }`}>
-                    {answer === i.toString() && <div className="w-3 h-3 rounded-full bg-[var(--color-theme-primary)]" />}
+                  <div className="w-8 h-8 rounded-xl bg-slate-800/80 border border-slate-700 mr-4 flex items-center justify-center font-bold text-slate-500 group-hover:bg-[var(--color-theme-primary)]/20 group-hover:text-[var(--color-theme-primary)] group-hover:border-[var(--color-theme-primary)]/50 transition-colors shadow-inner">
+                    {i + 1}
                   </div>
-                  <span className={`font-medium ${answer === i.toString() ? 'text-white' : 'text-slate-300'}`}>
+                  <span className="font-medium text-slate-200 group-hover:text-white transition-colors text-lg">
                     {opt}
                   </span>
-                </label>
+                </button>
               ))}
             </div>
           )}
@@ -144,26 +173,30 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
             />
           )}
 
-          <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              disabled={!answer}
-              className="px-8 py-3 bg-[var(--color-theme-primary)] hover:bg-[var(--color-theme-primary-hover)] disabled:opacity-30 disabled:hover:scale-100 hover:scale-105 text-white rounded-xl font-bold transition-all shadow-lg"
-            >
-              Confirm Answer
-            </button>
-          </div>
+          {question.type !== 'mcq' && (
+            <div className="flex justify-end pt-4">
+              <button
+                type="submit"
+                disabled={!answer}
+                className="px-8 py-3 bg-[var(--color-theme-primary)] hover:bg-[var(--color-theme-primary-hover)] disabled:opacity-30 disabled:hover:scale-100 hover:scale-105 text-white rounded-xl font-bold transition-all shadow-lg"
+              >
+                Confirm Answer
+              </button>
+            </div>
+          )}
         </form>
       )}
 
       {status === 'correct' && (
-        <div className="relative z-10 mt-8 p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center gap-4 animate-slide-up">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <CheckCircle2 className="w-7 h-7 text-emerald-400 animate-pulse" />
-          </div>
-          <div>
-            <p className="text-emerald-400 font-bold text-xl">Brilliant!</p>
-            <p className="text-emerald-500/70">Mastery increased. Resuming stream...</p>
+        <div className="absolute inset-0 z-20 bg-emerald-500/10 backdrop-blur-sm flex items-center justify-center animate-fade-in rounded-3xl">
+          <div className="p-8 rounded-3xl bg-black/50 border border-emerald-500/30 flex flex-col items-center justify-center gap-4 animate-slide-up shadow-[0_0_100px_rgba(16,185,129,0.3)]">
+            <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.5)]">
+              <CheckCircle2 className="w-12 h-12 text-emerald-400 animate-bounce" />
+            </div>
+            <div className="text-center">
+              <p className="text-emerald-400 font-black text-3xl mb-1 tracking-tight">Checkpoint Passed</p>
+              <p className="text-emerald-500/80 font-medium">Resuming video...</p>
+            </div>
           </div>
         </div>
       )}
