@@ -83,5 +83,92 @@ export const domains: Record<string, DomainContent> = {
         remediationTimestamp: 30,
       }
     ]
+  },
+  'product-management': {
+    videoId: '6uIeL2aV5xI', // Product Management Basics
+    questions: [
+      {
+        id: 'pm1',
+        timestamp: 60,
+        type: 'mcq',
+        text: 'What is the primary role of a Product Manager?',
+        options: [
+          'To write production code',
+          'To define the product vision and strategy',
+          'To design the user interface',
+          'To run marketing campaigns'
+        ],
+        correctAnswer: '1',
+        hint: 'Think about who decides WHAT to build rather than HOW to build it.',
+        remediationTimestamp: 45,
+      },
+      {
+        id: 'pm2',
+        timestamp: 180,
+        type: 'free-text',
+        text: 'What does MVP stand for in product development?',
+        correctAnswer: 'minimum viable product',
+        hint: 'It is the most basic version of a product that can be released.',
+        remediationTimestamp: 160,
+      }
+    ]
+  },
+  'agentic-workflows': {
+    videoId: 'tLJDETq54r8', // AI Agents Explained
+    questions: [
+      {
+        id: 'aw1',
+        timestamp: 90,
+        type: 'mcq',
+        text: 'Which pattern involves multiple agents working together on a task?',
+        options: [
+          'Reflection',
+          'Tool Use',
+          'Planning',
+          'Multi-agent Collaboration'
+        ],
+        correctAnswer: '3',
+        hint: 'The name implies more than one agent.',
+        remediationTimestamp: 75,
+      },
+      {
+        id: 'aw2',
+        timestamp: 240,
+        type: 'free-text',
+        text: 'Explain the concept of an "Agent" in AI.',
+        correctAnswer: 'action',
+        hint: 'Think about systems that can perceive their environment and take actions.',
+        remediationTimestamp: 220,
+      }
+    ]
+  },
+  'health-fitness': {
+    videoId: 'v7AYKMP6rOE', // Workout Basics
+    questions: [
+      {
+        id: 'hf1',
+        timestamp: 120,
+        type: 'mcq',
+        text: 'What is the recommended frequency for strength training per week?',
+        options: [
+          '1 day',
+          '2-3 days',
+          '5 days',
+          'Every day'
+        ],
+        correctAnswer: '1',
+        hint: 'Muscles need time to recover, but consistency is key.',
+        remediationTimestamp: 100,
+      },
+      {
+        id: 'hf2',
+        timestamp: 300,
+        type: 'free-text',
+        text: 'Why is protein important for fitness?',
+        correctAnswer: 'recovery',
+        hint: 'It helps rebuild muscle tissue after a workout.',
+        remediationTimestamp: 280,
+      }
+    ]
   }
 };
