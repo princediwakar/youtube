@@ -5,7 +5,7 @@ import Logo from '../app/logo.svg'
 
 export const Header = ({ handleSubmit }) => {
     return (
-        <header className="flex items-center justify-between bg-white px-6 py-3">
+        <header className="flex items-center justify-between bg-white px-6 py-3 sticky top-0 z-50">
             <MdMenu className="h-6 w-6" />
             <a href="/"><img src={Logo.src} alt="YouTube Logo" className="h-6 w-auto ml-6" /></a>
 

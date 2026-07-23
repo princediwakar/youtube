@@ -297,6 +297,18 @@
 @layer components;
 
 @layer utilities {
+  .sticky {
+    position: sticky;
+  }
+
+  .top-0 {
+    top: 0;
+  }
+
+  .z-50 {
+    z-index: 50;
+  }
+
   .mx-2 {
     margin-inline: calc(var(--spacing) * 2);
   }
