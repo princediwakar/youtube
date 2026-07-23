@@ -1,4 +1,4 @@
-import '../styles.css'
+import '../tailwind.css'
 
 export const metadata = {
   title: 'YouTube Clone',

@@ -21,6 +21,47 @@ export const App = () => {
 
   const fetchVideos = async (query) => {
     setLoadingProgress(30)
+    
+    // Using mock data as fallback when API fails or keys are missing
+    const handleMockData = () => {
+      const mockVideoResults = [
+        {
+          id: { kind: "youtube#video", videoId: 'dQw4w9WgXcQ' },
+          snippet: {
+            title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
+            channelTitle: 'Rick Astley',
+            description: 'The official video for “Never Gonna Give You Up” by Rick Astley',
+            publishedAt: '2009-10-24T00:00:00Z',
+            thumbnails: {
+              default: { url: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg' }
+            }
+          }
+        },
+        {
+          id: { kind: "youtube#video", videoId: 'kJQP7kiw5Fk' },
+          snippet: {
+            title: 'Luis Fonsi - Despacito ft. Daddy Yankee',
+            channelTitle: 'Luis Fonsi',
+            description: 'Despacito ft. Daddy Yankee (Official Music Video)',
+            publishedAt: '2017-01-13T00:00:00Z',
+            thumbnails: {
+              default: { url: 'https://i.ytimg.com/vi/kJQP7kiw5Fk/default.jpg' }
+            }
+          }
+        }
+      ]
+      setLoadingProgress(80)
+      setVideos(mockVideoResults)
+      setSelectedVideo(mockVideoResults[0])
+      setLoadingProgress(100)
+    }
+
+    if (!API_KEY || !BASE_URL) {
+        console.warn('API_KEY or BASE_URL is missing. Using mock data.')
+        handleMockData()
+        return
+    }
+
     await axios
       .get(`${BASE_URL}/search?part=snippet&maxResults=6&key=${API_KEY}&q=${query}`)
       .then(response => {
@@ -33,9 +74,11 @@ export const App = () => {
         setLoadingProgress(100)
 
       })
-      .catch(error => console.log('!!Something went wrong!!'))
+      .catch(error => {
+        console.error('API request failed. Falling back to mock data.', error)
+        handleMockData()
+      })
   }
-
   useEffect(() => {
     fetchVideos('learn react')
   }, [])

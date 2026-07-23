@@ -1,14 +1,12 @@
 import React from 'react'
-import Logo from '../logo.svg'
 import { MdNotifications, MdApps, MdVideoCall, MdMenu } from 'react-icons/md'
-
 import { SearchBar } from './SearchBar'
 
 export const Header = ({ handleSubmit }) => {
     return (
         <header className="flex items-center justify-between bg-white px-6 py-3">
             <MdMenu className="h-6 w-6" />
-            <a href="/"><img src={Logo} alt="" className="h-6 w-6 ml-6" /></a>
+            <a href="/"><img src="/logo.svg" alt="YouTube Logo" className="h-6 w-auto ml-6" /></a>
 
 
             <SearchBar

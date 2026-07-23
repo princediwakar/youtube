@@ -7,11 +7,10 @@ export const VideoDetails = ({ video }) => {
 
     return (
         <div className="w-full lg:w-2/3">
-            <div className="embed-responsive aspect-ratio-16/9">
+            <div className="aspect-video w-full">
                 <iframe
                     title="Video Player"
-                    height="100%" width="100%"
-                    className="embed-responsive-item"
+                    className="w-full h-full"
                     src={videoSrc}
                     frameBorder="0"
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"

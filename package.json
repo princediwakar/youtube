@@ -3,29 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
-    "autoprefixer": "^9.8.0",
     "axios": "^0.19.2",
     "moment": "^2.27.0",
     "next": "latest",
-    "postcss-cli": "^7.1.1",
     "prop-types": "^15.8.1",
     "react": "latest",
     "react-dom": "latest",
     "react-icons": "^3.10.0",
-    "react-top-loading-bar": "^3.0.2",
-    "tailwindcss": "^1.4.6",
-    "tailwindcss-responsive-embed": "^1.0.0"
+    "react-top-loading-bar": "^3.0.2"
   },
   "scripts": {
-    "dev": "npm run watch:css & next dev",
-    "build": "npm run build:css && next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "build:css": "postcss src/tailwind.css -o src/styles.css",
-    "watch:css": "postcss src/tailwind.css -o src/styles.css -w"
+    "lint": "next lint"
   },
   "browserslist": {
     "production": [
@@ -38,5 +33,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.22",
+    "tailwindcss": "^4.3.3"
   }
 }
