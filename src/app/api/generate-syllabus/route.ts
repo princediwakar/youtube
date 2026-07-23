@@ -9,6 +9,36 @@ const openai = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY || 'dummy_key',
 });
 
+// Mock Database for the "Golden Path"
+const GOLDEN_PATHS: Record<string, any> = {
+  "react hooks": {
+    videoId: "TNhaISOUy6Q", // Example React Hooks video
+    title: "11-Star Mastery Track: React Hooks",
+    questions: [
+      {
+        id: "gp-q1",
+        timestamp: 45, // Pause at 45s
+        type: "code",
+        text: "Complete this code to initialize a state variable 'count' with a default value of 0.",
+        codeSnippet: "const [count, setCount] = ______;",
+        correctAnswer: "useState(0)",
+        hint: "Think about the hook that manages state and what you pass to it as an initial value.",
+        remediationTimestamp: 30
+      },
+      {
+        id: "gp-q2",
+        timestamp: 120, // Pause at 120s
+        type: "mcq",
+        text: "When does the useEffect hook run by default?",
+        options: ["Only on mount", "After every render", "Before the component mounts", "Only when dependencies change"],
+        correctAnswer: "1",
+        hint: "Without a dependency array, useEffect runs after every single render.",
+        remediationTimestamp: 100
+      }
+    ]
+  }
+};
+
 export async function POST(req: Request) {
   try {
     const { query } = await req.json();
@@ -18,6 +48,13 @@ export async function POST(req: Request) {
     }
 
     console.log(`Generating syllabus for: ${query}`);
+
+    // Check for Golden Path
+    const normalizedQuery = query.toLowerCase().trim();
+    if (GOLDEN_PATHS[normalizedQuery]) {
+      console.log(`Serving Golden Path for: ${normalizedQuery}`);
+      return NextResponse.json(GOLDEN_PATHS[normalizedQuery]);
+    }
 
     // 1. Search YouTube for the best educational video
     const searchResult = await ytSearch(query + " course OR tutorial");
@@ -41,26 +78,29 @@ export async function POST(req: Request) {
 
     // 3. Generate JSON with DeepSeek
     const prompt = `
-      You are an expert educational AI. 
+      You are an expert educational AI designing an 11-star learning experience. 
       Topic: ${query}
       Video Title: ${topVideo.title}
       Transcript Snippet: ${transcriptText}
 
       Create a learning syllabus that maps to this video.
       Identify 2-3 conceptual boundaries in the topic where a student should be tested.
+      CRITICAL: Choose timestamps that occur during natural scene changes, breath pauses, or at the end of a sentence for a 'cinematic transition'.
       
       Output MUST be a valid JSON object matching this schema exactly:
       {
         "videoId": "${topVideo.videoId}",
+        "title": "Mastery Track: ${query}",
         "questions": [
           {
             "id": "q1",
             "timestamp": number (in seconds, e.g., 60, 120),
-            "type": "mcq" | "free-text",
+            "type": "mcq" | "free-text" | "code",
             "text": "The question text",
             "options": ["option 1", "option 2", "option 3", "option 4"], // only if type is "mcq"
-            "correctAnswer": "0" (index of correct option as string for mcq) OR "string match" (for free-text),
-            "hint": "A helpful hint if they get it wrong",
+            "codeSnippet": "function test() { _____ }", // only if type is "code"
+            "correctAnswer": "0" (index of correct option for mcq) OR "string match" (for free-text or code),
+            "hint": "A helpful hint if they get it wrong to be used by the AI tutor.",
             "remediationTimestamp": number (in seconds, slightly before the question timestamp)
           }
         ]

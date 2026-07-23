@@ -1,30 +1,49 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# ZenTuber — Guided Mastery Engine
 
-## Available Scripts
+An interactive YouTube-powered learning platform that turns any educational video into an adaptive quiz-based mastery session.
 
-In the project directory, you can run:
-### `yarn`
-This will install all the dependencies.
+## How it works
 
-### `yarn start`
+1. **Search a topic** — Enter any subject (e.g., "Advanced SQL Window Functions")
+2. **AI generates a syllabus** — DeepSeek analyzes the video transcript and creates conceptual checkpoints at specific timestamps
+3. **Watch & get quizzed** — The video auto-pauses at each checkpoint; answer correctly to increase your mastery score
+4. **Remediation on failure** — Wrong answers trigger a hint and a rewind to the relevant context
+5. **Flow Mode** — Toggle off interruptions to watch uninterrupted
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Tech stack
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+- **Next.js** (App Router)
+- **TypeScript**
+- **Tailwind CSS v4**
+- **Zustand** (state persistence)
+- **DeepSeek** (AI syllabus generation via OpenAI SDK)
+- **yt-search** (YouTube video search)
+- **youtube-transcript** (transcript fetching)
+- **react-youtube** (YouTube iframe player)
 
-### `yarn test`
+## Getting started
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+cp .env.local.example .env.local   # Add your DEEPSEEK_API_KEY
+npm run dev
+```
 
-### `yarn build`
+## Environment
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Variable | Description |
+|---|---|
+| `DEEPSEEK_API_KEY` | API key for DeepSeek (used for syllabus generation) |
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+## Scripts
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+
+## Themes
+
+Star Chart, Neon Cyber, Deep Ocean, and Ember Minimal — selected during onboarding.

@@ -29,13 +29,25 @@ export default function VideoPlayer() {
       if (playerRef.current) {
         const time = await playerRef.current.getCurrentTime();
         if (time !== undefined) {
+          // Trigger transition slightly earlier for the fade effect
           const matchingQuestion = mockQuestions.find(
-            (q) => !answeredQuestions.has(q.id) && time >= q.timestamp && time < q.timestamp + 2
+            (q) => !answeredQuestions.has(q.id) && time >= q.timestamp - 2 && time < q.timestamp
           );
 
           if (matchingQuestion) {
-            setCurrentQuestion(matchingQuestion);
-            playerRef.current.pauseVideo();
+            // Cinematic Transition: Duck volume then pause
+            let volume = await playerRef.current.getVolume();
+            const fadeOutInterval = setInterval(() => {
+              if (volume > 10) {
+                volume -= 10;
+                playerRef.current.setVolume(volume);
+              } else {
+                clearInterval(fadeOutInterval);
+                playerRef.current.pauseVideo();
+                playerRef.current.setVolume(100); // reset for when it resumes
+                setCurrentQuestion(matchingQuestion);
+              }
+            }, 100);
           }
         }
       }
@@ -166,7 +178,6 @@ export default function VideoPlayer() {
           <QuizOverlay 
             question={currentQuestion} 
             onPass={() => handleQuizPass(currentQuestion.id)} 
-            onRemediation={() => handleRemediation(currentQuestion.remediationTimestamp)}
             onSkip={() => handleSkip(currentQuestion.id)}
           />
         </div>

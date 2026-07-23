@@ -3,17 +3,17 @@
 import React, { useState } from 'react';
 import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
-import { CheckCircle2, AlertCircle, RefreshCw, Zap } from 'lucide-react';
+import { CheckCircle2, Zap } from 'lucide-react';
+import TutorMode from './TutorMode';
 
 interface QuizOverlayProps {
   question: Question;
   onPass: () => void;
-  onRemediation: () => void;
   onSkip: () => void;
 }
 
-export default function QuizOverlay({ question, onPass, onRemediation, onSkip }: QuizOverlayProps) {
-  const { incrementMastery, decrementMastery } = useStore();
+export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayProps) {
+  const { incrementMastery, isTutorModeActive, setIsTutorModeActive } = useStore();
   const [answer, setAnswer] = useState('');
   const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
 
@@ -24,7 +24,7 @@ export default function QuizOverlay({ question, onPass, onRemediation, onSkip }:
     if (question.type === 'mcq') {
       isCorrect = answer === question.correctAnswer;
     } else {
-      isCorrect = answer.toLowerCase().includes(question.correctAnswer.toLowerCase());
+      isCorrect = answer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
     }
 
     if (isCorrect) {
@@ -33,18 +33,32 @@ export default function QuizOverlay({ question, onPass, onRemediation, onSkip }:
       setTimeout(() => onPass(), 1500);
     } else {
       setStatus('wrong');
-      decrementMastery();
+      setIsTutorModeActive(true);
     }
   };
 
+  const handleReturnToQuiz = () => {
+    setIsTutorModeActive(false);
+    setStatus('idle');
+    setAnswer('');
+  };
+
+  if (isTutorModeActive && status === 'wrong') {
+    return (
+      <TutorMode 
+        question={question}
+        wrongAnswer={answer}
+        onReturnToQuiz={handleReturnToQuiz}
+      />
+    );
+  }
+
   return (
     <div className={`relative bg-slate-900/40 backdrop-blur-3xl border rounded-3xl p-8 max-w-2xl w-full shadow-2xl transition-all duration-500 overflow-hidden ${
-      status === 'wrong' ? 'animate-shake border-amber-500/50 shadow-[0_0_40px_rgba(245,158,11,0.2)]' : 
       status === 'correct' ? 'border-emerald-500/50 shadow-[0_0_40px_rgba(16,185,129,0.3)]' : 'border-slate-700/50 hover:border-slate-600 animate-slide-up'
     }`}>
       {/* Decorative Glow */}
       <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 blur-3xl opacity-20 pointer-events-none transition-colors duration-500 ${
-        status === 'wrong' ? 'bg-amber-500' : 
         status === 'correct' ? 'bg-emerald-500' : 'bg-[var(--color-theme-primary)]'
       }`} />
 
@@ -67,7 +81,7 @@ export default function QuizOverlay({ question, onPass, onRemediation, onSkip }:
 
       {status !== 'correct' && (
         <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
-          {question.type === 'mcq' && question.options ? (
+          {question.type === 'mcq' && question.options && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {question.options.map((opt, i) => (
                 <label 
@@ -97,7 +111,31 @@ export default function QuizOverlay({ question, onPass, onRemediation, onSkip }:
                 </label>
               ))}
             </div>
-          ) : (
+          )}
+
+          {question.type === 'code' && question.codeSnippet && (
+            <div className="bg-[#1e1e1e] p-6 rounded-2xl border border-slate-700 shadow-inner">
+              <div className="flex items-center gap-2 mb-4 border-b border-slate-700 pb-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span className="text-slate-400 text-xs font-mono ml-2">sandbox.js</span>
+              </div>
+              <p className="font-mono text-slate-300 text-lg whitespace-pre-wrap">
+                {question.codeSnippet.split('______')[0]}
+                <input 
+                  type="text" 
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  className="bg-slate-800 border-b-2 border-[var(--color-theme-primary)] text-white font-mono px-2 py-1 mx-1 outline-none w-32 focus:w-48 transition-all"
+                  autoFocus
+                />
+                {question.codeSnippet.split('______')[1]}
+              </p>
+            </div>
+          )}
+
+          {question.type === 'free-text' && (
             <textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
@@ -116,27 +154,6 @@ export default function QuizOverlay({ question, onPass, onRemediation, onSkip }:
             </button>
           </div>
         </form>
-      )}
-
-      {status === 'wrong' && (
-        <div className="relative z-10 mt-6 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/20 backdrop-blur-md animate-slide-up">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
-              <AlertCircle className="w-6 h-6 text-amber-500" />
-            </div>
-            <div>
-              <p className="text-amber-300 font-bold mb-1 text-lg">Let's refine your understanding</p>
-              <p className="text-amber-100/70 mb-4 leading-relaxed">Hint: {question.hint}</p>
-              <button
-                onClick={onRemediation}
-                className="flex items-center gap-2 text-sm px-6 py-3 bg-amber-500 text-amber-950 hover:bg-amber-400 font-bold rounded-xl transition-all hover:scale-105"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Rewind & Review Context
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {status === 'correct' && (
