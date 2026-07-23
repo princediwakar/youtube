@@ -20,7 +20,7 @@ const VideoDetails = ({ video })=>{
     }, ("TURBOPACK compile-time value", void 0));
     const videoSrc = `https://www.youtube.com/embed/${video.id.videoId}`;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "w-full lg:w-2/3",
+        className: "w-full lg:w-2/3 lg:sticky lg:top-6 lg:self-start",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "aspect-video w-full",
@@ -507,7 +507,7 @@ const App = ()=>{
         };
         if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
         ;
-        await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`${BASE_URL}/search?part=snippet&maxResults=12&key=${API_KEY}&q=${query}`).then((response)=>{
+        await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`${BASE_URL}/search?part=snippet&maxResults=12&regionCode=US&key=${API_KEY}&q=${query}`).then((response)=>{
             const videoResults = response.data.items.filter((item)=>item.id.kind === "youtube#video");
             setLoadingProgress(80);
             setVideos(videoResults);

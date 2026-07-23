@@ -24,7 +24,7 @@ var VideoDetails = function VideoDetails(param) {
     }, _this);
     var videoSrc = "https://www.youtube.com/embed/".concat(video.id.videoId);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "w-full lg:w-2/3",
+        className: "w-full lg:w-2/3 lg:sticky lg:top-6 lg:self-start",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "aspect-video w-full",
@@ -545,7 +545,7 @@ var App = function App() {
                         ;
                         return [
                             4,
-                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("".concat(BASE_URL, "/search?part=snippet&maxResults=12&key=").concat(API_KEY, "&q=").concat(query)).then(function(response) {
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("".concat(BASE_URL, "/search?part=snippet&maxResults=12&regionCode=US&key=").concat(API_KEY, "&q=").concat(query)).then(function(response) {
                                 var videoResults = response.data.items.filter(function(item) {
                                     return item.id.kind === "youtube#video";
                                 });

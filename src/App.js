@@ -63,7 +63,7 @@ export const App = () => {
     }
 
     await axios
-      .get(`${BASE_URL}/search?part=snippet&maxResults=12&key=${API_KEY}&q=${query}`)
+      .get(`${BASE_URL}/search?part=snippet&maxResults=12&regionCode=US&key=${API_KEY}&q=${query}`)
       .then(response => {
         const videoResults = response.data.items.filter(item => item.id.kind === "youtube#video")
         setLoadingProgress(80)

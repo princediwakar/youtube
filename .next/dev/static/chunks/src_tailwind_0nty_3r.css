@@ -522,6 +522,14 @@
   }
 
   @media (min-width: 64rem) {
+    .lg\:sticky {
+      position: sticky;
+    }
+
+    .lg\:top-6 {
+      top: calc(var(--spacing) * 6);
+    }
+
     .lg\:mt-0 {
       margin-top: 0;
     }
@@ -540,6 +548,10 @@
 
     .lg\:w-2\/3 {
       width: 66.6667%;
+    }
+
+    .lg\:self-start {
+      align-self: flex-start;
     }
   }
 }

@@ -6,7 +6,7 @@ export const VideoDetails = ({ video }) => {
     const videoSrc = `https://www.youtube.com/embed/${video.id.videoId}`
 
     return (
-        <div className="w-full lg:w-2/3">
+        <div className="w-full lg:w-2/3 lg:sticky lg:top-6 lg:self-start">
             <div className="aspect-video w-full">
                 <iframe
                     title="Video Player"
