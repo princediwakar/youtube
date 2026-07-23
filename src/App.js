@@ -1,11 +1,12 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import { Header, VideoDetails, VideosList } from './components'
 import axios from 'axios';
 import LoadingBar from 'react-top-loading-bar'
 
 
-const API_KEY = process.env.REACT_APP_API_KEY
-const BASE_URL = process.env.REACT_APP_BASE_URL
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
 
 
 export const App = () => {

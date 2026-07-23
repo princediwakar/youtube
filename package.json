@@ -9,22 +9,23 @@
     "autoprefixer": "^9.8.0",
     "axios": "^0.19.2",
     "moment": "^2.27.0",
+    "next": "latest",
     "postcss-cli": "^7.1.1",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "prop-types": "^15.8.1",
+    "react": "latest",
+    "react-dom": "latest",
     "react-icons": "^3.10.0",
-    "react-scripts": "3.4.1",
     "react-top-loading-bar": "^1.2.0",
     "tailwindcss": "^1.4.6",
     "tailwindcss-responsive-embed": "^1.0.0"
   },
   "scripts": {
-    "start": "yarn watch:css && react-scripts start",
-    "build": "yarn build:css && react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "npm run watch:css & next dev",
+    "build": "npm run build:css && next build",
+    "start": "next start",
+    "lint": "next lint",
     "build:css": "postcss src/tailwind.css -o src/styles.css",
-    "watch:css": "postcss src/tailwind.css -o src/styles.css"
+    "watch:css": "postcss src/tailwind.css -o src/styles.css -w"
   },
   "browserslist": {
     "production": [
