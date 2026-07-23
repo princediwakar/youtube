@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Question } from '@/data/mockBrain';
+import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import { CheckCircle2, AlertCircle, RefreshCw, Zap } from 'lucide-react';
 
