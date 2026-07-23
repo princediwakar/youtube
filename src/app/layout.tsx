@@ -1,4 +1,5 @@
 import '../tailwind.css'
+import ThemeWrapper from '../components/ThemeWrapper'
 
 export const metadata = {
   title: 'ZenTuber',
@@ -12,7 +13,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-slate-900 text-white min-h-screen">{children}</body>
+      <body>
+        <ThemeWrapper>
+          {children}
+        </ThemeWrapper>
+      </body>
     </html>
   )
 }

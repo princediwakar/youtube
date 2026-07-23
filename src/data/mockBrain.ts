@@ -170,5 +170,145 @@ export const domains: Record<string, DomainContent> = {
         remediationTimestamp: 280,
       }
     ]
+  },
+  'creative-writing': {
+    videoId: 'OAs3C5h7-aI', // Writing Basics
+    questions: [
+      {
+        id: 'cw1',
+        timestamp: 60,
+        type: 'mcq',
+        text: 'What is "show, don\'t tell"?',
+        options: [
+          'A technique to describe actions and senses instead of stating facts',
+          'A way to write dialogue',
+          'A rule for formatting screenplays',
+          'A method to outline a story'
+        ],
+        correctAnswer: '0',
+        hint: 'It allows the reader to experience the story through action and senses.',
+        remediationTimestamp: 45,
+      }
+    ]
+  },
+  'personal-finance': {
+    videoId: 'dQw4w9WgXcQ', // Finance Basics
+    questions: [
+      {
+        id: 'pf1',
+        timestamp: 120,
+        type: 'mcq',
+        text: 'What is the 50/30/20 rule?',
+        options: [
+          '50% needs, 30% wants, 20% savings',
+          '50% savings, 30% needs, 20% wants',
+          '50% wants, 30% needs, 20% savings',
+          '50% stocks, 30% bonds, 20% cash'
+        ],
+        correctAnswer: '0',
+        hint: 'Needs should be the largest portion, followed by wants and then savings.',
+        remediationTimestamp: 100,
+      }
+    ]
+  },
+  'machine-learning': {
+    videoId: 'KNAWp2cw6jM', // ML Basics
+    questions: [
+      {
+        id: 'ml1',
+        timestamp: 90,
+        type: 'mcq',
+        text: 'What is supervised learning?',
+        options: [
+          'Learning without labels',
+          'Learning with labeled data',
+          'Learning by trial and error',
+          'Learning from unorganized data'
+        ],
+        correctAnswer: '1',
+        hint: 'The algorithm learns from data that already has the answers (labels).',
+        remediationTimestamp: 75,
+      }
+    ]
+  },
+  'graphic-design': {
+    videoId: 'YqQx75OPRa0', // Design Basics
+    questions: [
+      {
+        id: 'gd1',
+        timestamp: 80,
+        type: 'mcq',
+        text: 'What is the rule of thirds?',
+        options: [
+          'Using exactly three colors',
+          'Dividing an image into a 3x3 grid to place subjects',
+          'Designing in three stages',
+          'Having three main elements in a design'
+        ],
+        correctAnswer: '1',
+        hint: 'It involves a grid to help compose visually pleasing images.',
+        remediationTimestamp: 65,
+      }
+    ]
+  },
+  'music-theory': {
+    videoId: 'rDk6Meb03aQ', // Music Theory Basics
+    questions: [
+      {
+        id: 'mt1',
+        timestamp: 150,
+        type: 'mcq',
+        text: 'What is a chord?',
+        options: [
+          'A single note',
+          'Two or more notes played together',
+          'Three or more notes played together',
+          'A rhythm pattern'
+        ],
+        correctAnswer: '2',
+        hint: 'It involves multiple notes sounding at the same time, usually at least three.',
+        remediationTimestamp: 135,
+      }
+    ]
+  },
+  'astronomy': {
+    videoId: 'libKVRa01L8', // Astronomy Basics
+    questions: [
+      {
+        id: 'as1',
+        timestamp: 110,
+        type: 'mcq',
+        text: 'What is a light-year?',
+        options: [
+          'The time it takes light to travel in a year',
+          'The distance light travels in one year',
+          'The speed of light',
+          'The brightness of a star over a year'
+        ],
+        correctAnswer: '1',
+        hint: 'It is a unit of length, not time.',
+        remediationTimestamp: 95,
+      }
+    ]
+  },
+  'photography': {
+    videoId: 'V7z7BAZdt2M', // Photography Basics
+    questions: [
+      {
+        id: 'ph1',
+        timestamp: 70,
+        type: 'mcq',
+        text: 'What does aperture control?',
+        options: [
+          'Shutter speed',
+          'ISO',
+          'The amount of light entering the lens',
+          'The focal length'
+        ],
+        correctAnswer: '2',
+        hint: 'It works like the pupil of an eye.',
+        remediationTimestamp: 55,
+      }
+    ]
   }
 };

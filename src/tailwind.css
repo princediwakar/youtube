@@ -1,1 +1,67 @@
 @import "tailwindcss";
+
+@theme {
+  --color-theme-bg: var(--color-theme-bg);
+  --color-theme-surface: var(--color-theme-surface);
+  --color-theme-surface-hover: var(--color-theme-surface-hover);
+  --color-theme-border: var(--color-theme-border);
+  --color-theme-primary: var(--color-theme-primary);
+  --color-theme-primary-hover: var(--color-theme-primary-hover);
+  --color-theme-text-main: var(--color-theme-text-main);
+  --color-theme-text-muted: var(--color-theme-text-muted);
+  --color-theme-glow: var(--color-theme-glow);
+}
+
+:root, [data-theme="star-chart"] {
+  --color-theme-bg: #020617;
+  --color-theme-surface: #0f172a;
+  --color-theme-surface-hover: #1e293b;
+  --color-theme-border: #334155;
+  --color-theme-primary: #6366f1;
+  --color-theme-primary-hover: #4f46e5;
+  --color-theme-text-main: #f8fafc;
+  --color-theme-text-muted: #94a3b8;
+  --color-theme-glow: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="neon-cyber"] {
+  --color-theme-bg: #09090b;
+  --color-theme-surface: #18181b;
+  --color-theme-surface-hover: #27272a;
+  --color-theme-border: #3f3f46;
+  --color-theme-primary: #d946ef;
+  --color-theme-primary-hover: #c026d3;
+  --color-theme-text-main: #fafafa;
+  --color-theme-text-muted: #a1a1aa;
+  --color-theme-glow: rgba(217, 70, 239, 0.6);
+}
+
+[data-theme="deep-ocean"] {
+  --color-theme-bg: #042f2e;
+  --color-theme-surface: #134e4a;
+  --color-theme-surface-hover: #115e59;
+  --color-theme-border: #0f766e;
+  --color-theme-primary: #14b8a6;
+  --color-theme-primary-hover: #0d9488;
+  --color-theme-text-main: #f0fdfa;
+  --color-theme-text-muted: #99f6e4;
+  --color-theme-glow: rgba(20, 184, 166, 0.5);
+}
+
+[data-theme="ember-minimal"] {
+  --color-theme-bg: #1c1917;
+  --color-theme-surface: #292524;
+  --color-theme-surface-hover: #44403c;
+  --color-theme-border: #57534e;
+  --color-theme-primary: #f97316;
+  --color-theme-primary-hover: #ea580c;
+  --color-theme-text-main: #fafaf9;
+  --color-theme-text-muted: #a8a29e;
+  --color-theme-glow: rgba(249, 115, 22, 0.5);
+}
+
+body {
+  background-color: var(--color-theme-bg);
+  color: var(--color-theme-text-main);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
