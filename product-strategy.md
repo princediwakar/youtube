@@ -29,10 +29,11 @@ The player monitors playback and intervenes at conceptual boundaries — but the
 * **Flow Mode toggle.** One tap disables interception entirely for a session. Preserves user agency and prevents the app from feeling authoritarian — critical for retention.
 
 ### B. Proactive Curation with an Escape Hatch
-The homepage and search bar are still eliminated by default — the app queues the single best next video based on goals, time of day, and performance.
+The homepage and search bar are eliminated — permanently, after the one-time setup described in 3F. The app queues the single best next video based on goals, time of day, and performance.
 
 * **But:** a persistent, low-friction "not this" affordance always exists. A wrong pick with zero recourse breaks trust in the whole system; a wrong pick with a one-tap correction is a minor annoyance.
 * Curation logic explicitly favors **spaced-repetition due items** over new material when a concept is close to being forgotten (see 3C).
+* **Search does not reappear after first-run setup.** The only input the user ever gives to "steer" the app is the initial goal capture (3F) plus the ongoing "not this" correction above. This is a deliberate constraint — reintroducing a persistent search bar would let passive browsing creep back in and undercut the entire proactive premise.
 
 ### C. Cross-Session Mastery Graph + Spaced Repetition (the compounding engine)
 This is the feature that turns ZenTube from "a quiz app" into something that measurably outperforms normal learning.
@@ -56,11 +57,19 @@ Not everything on YouTube is a lecture, and the engine needs to know the differe
 * Interception and quizzing apply automatically only to instructional content; ambiguous content defaults to Flow Mode with a one-tap "actually, quiz me on this" override.
 * This prevents the single biggest early churn risk: the engine firing quizzes on a video the user just wanted to relax with.
 
-### F. Onboarding Calibration *(new)*
-The proactive engine needs a cold-start signal instead of guessing blind on day one.
+### F. Onboarding Calibration & First-Run Goal Capture *(new)*
+The proactive engine needs a cold-start signal instead of guessing blind on day one — and this is also the answer to "why does the app default to coding content?" It doesn't default to anything; it asks once, then never again.
 
-* When a user starts a new topic, a short (2-minute) diagnostic — a handful of adaptive questions — seeds the knowledge graph with an initial estimate of what they already know.
-* This lets curation (3B) skip material the user has already mastered instead of starting everyone at zero.
+* **First launch only:** a single lightweight prompt — "What do you want to get better at?" — either free text or a short list of domains (coding, languages, history, cooking, finance, etc.). This is not a search bar: it's a one-time goal declaration, not a persistent browsing tool.
+* This immediately feeds a short (~2-minute) adaptive diagnostic in the declared domain, seeding the knowledge graph with an initial estimate of what the user already knows.
+* Curation (3B) then skips material the user has already mastered instead of starting everyone at zero — and, critically, never shows the same content-domain default (e.g., JavaScript) to a user who declared a different goal.
+* **This screen appears exactly once per new topic.** After setup, the app returns to pure proactive queuing (3B) — no search bar resurfaces. Adding a new learning goal later (e.g., "also teach me Spanish") re-triggers this same one-time flow for that topic only, not a persistent search habit.
+
+| | Search bar (rejected) | First-run goal capture (adopted) |
+|---|---|---|
+| Persists after first session? | Yes — always available, invites browsing | No — one-time per topic, then disappears |
+| What it does | Finds a specific video | Declares a topic so curation can stop guessing |
+| Undermines proactive curation? | Yes — reintroduces passive browsing as a habit | No — it's the missing input curation needs, not an escape hatch from it |
 
 ---
 
@@ -77,15 +86,16 @@ Since the product's core mechanic is repeatedly testing the user, the tone of fa
 ## 5. Phase 1 Implementation Strategy
 V1 focuses on proving the **Adaptive Interception Engine** end-to-end, including the parts that make it feel coached rather than punitive — since that UX risk is the one most likely to sink the product if left to Phase 2.
 
-1. **Modify the Player:** Extend the existing Next.js app via the YouTube IFrame API to control playback and listen to timestamps.
-2. **Approximate semantic segmentation cheaply:** Use YouTube's native chapter markers as a proxy for concept boundaries where available (avoids building embedding-based segmentation for the demo).
-3. **Build the Quiz UI:** A glassmorphic overlay, plus — critically — the **wrong-answer remediation flow** (auto-rewind + hint + re-ask) built now, not deferred. This is the single highest-leverage UX element to validate early.
-4. **Confidence tagging:** A simple "I know this" pre-quiz prompt, hardcoded logic to skip/flag accordingly.
-5. **Mock the Brain:** Hardcode a question set (MCQ + one free-text) at chapter-marker timestamps for a demo video, proving the UX before wiring up dynamic LLM generation.
-6. **The Zen Dashboard (v1 scope):** Local-storage-based tracking of Mastery Score, incremented on quiz pass, decremented/flagged on repeated failure — laying the groundwork for the full spaced-repetition scheduler in Phase 2.
-7. **Flow Mode toggle:** Ship even in V1 — trivial to build, and removes the single biggest reason a tester would bounce off the demo.
+1. **First-run goal capture screen:** Before anything else loads, show the one-time "What do you want to get better at?" prompt (3F) with a short hardcoded list of domains (e.g., Coding, Cooking, History). This replaces the current behavior of silently defaulting to a JavaScript video — the demo should never assume a domain the user didn't choose.
+2. **Modify the Player:** Extend the existing Next.js app via the YouTube IFrame API to control playback and listen to timestamps.
+3. **Approximate semantic segmentation cheaply:** Use YouTube's native chapter markers as a proxy for concept boundaries where available (avoids building embedding-based segmentation for the demo).
+4. **Build the Quiz UI:** A glassmorphic overlay, plus — critically — the **wrong-answer remediation flow** (auto-rewind + hint + re-ask) built now, not deferred. This is the single highest-leverage UX element to validate early.
+5. **Confidence tagging:** A simple "I know this" pre-quiz prompt, hardcoded logic to skip/flag accordingly.
+6. **Mock the Brain, per domain:** Hardcode a question set (MCQ + one free-text) for at least two domains — e.g., the existing JS video plus one non-coding video (history, cooking) — mapped to chapter-marker timestamps. Which set loads is driven by the goal-capture choice in step 1, proving the mechanism generalizes beyond code.
+7. **The Zen Dashboard (v1 scope):** Local-storage-based tracking of Mastery Score, incremented on quiz pass, decremented/flagged on repeated failure — laying the groundwork for the full spaced-repetition scheduler in Phase 2.
+8. **Flow Mode toggle:** Ship even in V1 — trivial to build, and removes the single biggest reason a tester would bounce off the demo.
 
-**Explicitly deferred to Phase 2:** cross-session spaced repetition scheduling, embedding-based segmentation, content classifier, onboarding diagnostic, and the Live Sandbox.
+**Explicitly deferred to Phase 2:** cross-session spaced repetition scheduling, embedding-based segmentation, the *adaptive* diagnostic (V1 ships only the domain-selection prompt, not the full 2-minute calibration quiz), content classifier, and the Live Sandbox.
 
 ---
 
