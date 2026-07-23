@@ -81,7 +81,22 @@ export async function POST(req: Request) {
       throw new Error("Failed to generate content");
     }
 
-    const domainContent = JSON.parse(content);
+    let domainContent;
+    try {
+      // Find the first '{' and the last '}' to extract the JSON object, ignoring any other text/markdown
+      const firstBrace = content.indexOf('{');
+      const lastBrace = content.lastIndexOf('}');
+      
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        const jsonString = content.substring(firstBrace, lastBrace + 1);
+        domainContent = JSON.parse(jsonString);
+      } else {
+        throw new Error("No JSON object found in the response");
+      }
+    } catch (parseError: any) {
+      console.error("Failed to parse JSON. Raw content:", content);
+      throw new Error("Failed to parse JSON from AI response: " + parseError.message);
+    }
     
     // Ensure videoId matches what we found
     domainContent.videoId = topVideo.videoId;
