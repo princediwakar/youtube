@@ -111,7 +111,7 @@ export default function Onboarding() {
             {step === 1 ? 'What do you want to master today?' : 'Set Your Atmosphere'}
           </h1>
           <p className="text-xl md:text-2xl max-w-2xl mx-auto font-light" style={{ color: 'var(--color-theme-text-muted, #94a3b8)' }}>
-            {step === 1 ? 'Enter any topic, from Advanced SQL to Pre-Socratic Philosophy, and we will build your syllabus.' : 'Personalize your learning environment for maximum flow.'}
+            {step === 1 ? 'Enter any topic, from History and Literature to Finance and AI, and we will build your syllabus.' : 'Personalize your learning environment for maximum flow.'}
           </p>
         </div>
 

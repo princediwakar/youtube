@@ -29,8 +29,13 @@ export default function VideoPlayer() {
   const [isMouseIdle, setIsMouseIdle] = useState(false);
   const hideCursorTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // If in fallback mode, use a safe video ID
-  const videoId = fallbackMode ? 'zjkBMFhNj_g' : (currentSyllabus?.videoId || 'zjkBMFhNj_g');
+  // Freeze the videoId on first mount so background question updates
+  // don't remount the <YouTube> iframe (which crashes with a null .src error).
+  const frozenVideoId = useRef<string | null>(null);
+  if (!frozenVideoId.current) {
+    frozenVideoId.current = currentSyllabus?.videoId || 'zjkBMFhNj_g';
+  }
+  const videoId = fallbackMode ? 'zjkBMFhNj_g' : frozenVideoId.current;
   const questions = currentSyllabus?.questions || [];
 
   // Polling for video time
@@ -78,23 +83,29 @@ export default function VideoPlayer() {
     return () => clearInterval(interval);
   }, [isFlowMode, currentQuestion, answeredQuestions, questions, hasStarted, isPlaying, duration]);
 
-  const onReady: YouTubeProps['onReady'] = (event: any) => {
+  const onReady: YouTubeProps['onReady'] = React.useCallback((event: any) => {
     playerRef.current = event.target;
     setIsPlayerReady(true);
-  };
+  }, []);
 
-  const onStateChange: YouTubeProps['onStateChange'] = (event: any) => {
+  const onStateChange: YouTubeProps['onStateChange'] = React.useCallback((event: any) => {
     if (event.data === 1) setIsPlaying(true);
     else if (event.data === 2 || event.data === 0) {
       setIsPlaying(false);
       if (event.data === 0) setSessionComplete(true);
     }
-  };
+  }, []);
 
-  const onError: YouTubeProps['onError'] = () => {
-    // Silently ignore embedding errors; the video simply won't play
-    console.warn('YouTube player error — video may not support embedding.');
-  };
+  const onError: YouTubeProps['onError'] = React.useCallback((event: any) => {
+    // Error code 150/101 = video embedding disabled by owner → switch to fallback
+    if (event?.data === 150 || event?.data === 101) {
+      console.warn('YouTube player: embedding disabled, switching to fallback video.');
+      frozenVideoId.current = 'zjkBMFhNj_g';
+      setFallbackMode(true);
+    } else {
+      console.warn('YouTube player error — video may not support embedding.', event?.data);
+    }
+  }, []);
 
   const handleStartSession = () => {
     setHasStarted(true);
@@ -246,7 +257,7 @@ export default function VideoPlayer() {
     if (hideCursorTimeout.current) clearTimeout(hideCursorTimeout.current);
   };
 
-  const opts: YouTubeProps['opts'] = {
+  const opts: YouTubeProps['opts'] = React.useMemo(() => ({
     height: '100%',
     width: '100%',
     playerVars: {
@@ -259,7 +270,21 @@ export default function VideoPlayer() {
       iv_load_policy: 3,
       origin: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
     },
-  };
+  }), [fallbackMode]);
+
+  const youtubeElement = React.useMemo(() => {
+    return (
+      <YouTube 
+        videoId={videoId} 
+        opts={opts} 
+        onReady={onReady} 
+        onStateChange={onStateChange}
+        onError={onError}
+        className="w-full h-full pointer-events-none"
+        iframeClassName="w-full h-full pointer-events-none"
+      />
+    );
+  }, [videoId, opts, onReady, onStateChange, onError]);
 
   return (
     <div 
@@ -269,15 +294,7 @@ export default function VideoPlayer() {
       onMouseLeave={handleMouseLeave}
     >
       <div className="absolute inset-0 pointer-events-none z-0">
-        <YouTube 
-          videoId={videoId} 
-          opts={opts} 
-          onReady={onReady} 
-          onStateChange={onStateChange}
-          onError={onError}
-          className="w-full h-full pointer-events-none"
-          iframeClassName="w-full h-full pointer-events-none"
-        />
+        {youtubeElement}
       </div>
 
       {/* Invisible overlay to capture clicks and prevent YouTube native UI from showing on hover */}

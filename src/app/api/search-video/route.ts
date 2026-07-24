@@ -1,6 +1,31 @@
 import { NextResponse } from 'next/server';
-// @ts-ignore
-import ytSearch from 'yt-search';
+
+// Channel-level blocklist (normalised, no spaces)
+const EXCLUDED_CHANNELS = [
+  'apnacollege', 'chaiaurcode', 'simplilearn', 'edureka', 'codewithharry',
+  'telusko', 'krishnaik', 'geeksforgeeks', 'programmingwithmosh',
+  'rachanaranade', 'carachana', 'labmumbai', 'finology', 'zerodha',
+  'anilsinghvi', 'nptel', 'unacademy', 'byjus', 'vedantu', 'physicswallah',
+  'careerride', 'intellipaat', 'javapoint', 'tutorialspoint'
+];
+
+// Title-level blocklist
+const BLOCKED_TITLE_PATTERNS = [
+  'hindi', 'हिंदी', 'urdu', 'bangla', 'tamil', 'telugu',
+  'marathi', 'punjabi', 'gujarati', 'kannada', 'malayalam',
+  'français', 'español', 'deutsch', 'italiano', 'português',
+  'türkçe', 'русский', '日本語', '中文', '한국어',
+  'by ca ', '| ca ', 'ca rachana', 'ca ranade',
+  'in hindi', 'in urdu', 'in tamil', 'in telugu', 'in bangla'
+];
+
+function isAllowed(channelTitle: string, videoTitle: string, strict = true): boolean {
+  const ch = channelTitle.toLowerCase().replace(/\s+/g, '');
+  const t = videoTitle.toLowerCase();
+  if (EXCLUDED_CHANNELS.some(ex => ch.includes(ex))) return false;
+  if (BLOCKED_TITLE_PATTERNS.some(p => t.includes(p.toLowerCase()))) return false;
+  return true;
+}
 
 export async function POST(req: Request) {
   try {
@@ -12,65 +37,68 @@ export async function POST(req: Request) {
 
     console.log(`Searching video for: ${query}`);
 
-    // 0. Check if the query is actually a direct YouTube URL
-    let explicitVideoId = null;
+    // 0. Check if the query is a direct YouTube URL
     const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-    const match = query.match(ytRegex);
-    if (match && match[1]) {
-      explicitVideoId = match[1];
-      console.log(`Detected direct YouTube URL. Extracting ID: ${explicitVideoId}`);
+    const urlMatch = query.match(ytRegex);
+    if (urlMatch?.[1]) {
+      console.log(`Direct YouTube URL detected. ID: ${urlMatch[1]}`);
+      return NextResponse.json({ videoId: urlMatch[1], title: 'Custom Video URL' });
     }
 
-    let topVideo;
+    // 1. Use YouTube Data API v3 (works reliably in serverless / Vercel production)
+    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+    if (!apiKey) throw new Error('YouTube API key not configured');
 
-    if (explicitVideoId) {
-      // If a URL was provided, bypass search and mock a topVideo object
-      topVideo = { videoId: explicitVideoId, title: "Custom Video URL" };
-    } else {
-      // 1. Search YouTube for the best educational video
-      // Append negative keywords to filter out regional content and force English
-      const advancedQuery = `${query} (course OR tutorial) English`;
-      const searchResult = await ytSearch({
-        query: advancedQuery,
-        gl: 'US',
-        hl: 'en'
-      });
-      
-      // Filter out common mega-channels that dominate tech searches if the user wants diverse/western creators
-      const excludedChannels = ['apnacollege', 'chaiaurcode', 'simplilearn', 'edureka', 'codewithharry', 'telusko', 'krishnaik', 'geeksforgeeks', 'programmingwithmosh'];
-      const nonEnglishTitleKeywords = ['hindi', 'हिंदी', 'urdu', 'bangla', 'tamil', 'telugu', 'marathi', 'punjabi', 'gujarati', 'kannada', 'malayalam', 'français', 'español', 'deutsch', 'italiano', 'português', 'türkçe', 'русский', '日本語', '中文', '한국어', '阿拉伯'];
-      
-      topVideo = searchResult.videos.find((video: any) => {
-        const channelName = (video.author?.name?.toLowerCase() || '').replace(/\s+/g, '');
-        const title = video.title?.toLowerCase() || '';
-        
-        // Skip if channel name is in our exclusion list
-        if (excludedChannels.some(excluded => channelName.includes(excluded))) return false;
-        
-        // Skip if the video title contains non-English language indicators
-        if (nonEnglishTitleKeywords.some(kw => title.includes(kw.toLowerCase()))) return false;
-        
-        return true;
-      }) || searchResult.videos[0]; // fallback to first if all are filtered out
+    const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
+    searchUrl.searchParams.set('part', 'snippet');
+    searchUrl.searchParams.set('q', `${query} explained`);
+    searchUrl.searchParams.set('type', 'video');
+    searchUrl.searchParams.set('maxResults', '20');
+    searchUrl.searchParams.set('relevanceLanguage', 'en');
+    searchUrl.searchParams.set('regionCode', 'US');
+    searchUrl.searchParams.set('videoEmbeddable', 'true');
+    searchUrl.searchParams.set('key', apiKey);
+
+    const ytRes = await fetch(searchUrl.toString());
+    if (!ytRes.ok) {
+      const errBody = await ytRes.text();
+      throw new Error(`YouTube API error ${ytRes.status}: ${errBody}`);
     }
 
-    if (!topVideo) {
-      console.log('No video found, using fallback.');
-      topVideo = { videoId: 'dQw4w9WgXcQ', title: 'Fallback Video' };
+    const ytData = await ytRes.json();
+    const items: any[] = ytData.items || [];
+
+    // 2. Apply blocklist filters — strict first, then relaxed
+    let topItem =
+      items.find(item => {
+        const ch = item.snippet?.channelTitle || '';
+        const t = item.snippet?.title || '';
+        return isAllowed(ch, t, true);
+      }) ||
+      items.find(item => {
+        const ch = item.snippet?.channelTitle || '';
+        const t = item.snippet?.title || '';
+        // relaxed: only channel blocklist
+        return !EXCLUDED_CHANNELS.some(ex => ch.toLowerCase().replace(/\s+/g, '').includes(ex));
+      }) ||
+      items[0];
+
+    if (!topItem) {
+      console.log('No video found via API, using fallback.');
+      return NextResponse.json({ videoId: 'dQw4w9WgXcQ', title: 'Fallback Video' });
     }
 
-    console.log(`Found video: ${topVideo.title} (ID: ${topVideo.videoId})`);
+    const videoId = topItem.id?.videoId;
+    const title = topItem.snippet?.title || 'Educational Video';
+    console.log(`Found video: ${title} (ID: ${videoId})`);
 
-    return NextResponse.json({
-      videoId: topVideo.videoId,
-      title: topVideo.title
-    });
+    return NextResponse.json({ videoId, title });
 
   } catch (error: any) {
     console.error('Error searching video:', error);
     return NextResponse.json({
-      videoId: "dQw4w9WgXcQ", 
-      title: "Mastery Track"
+      videoId: 'dQw4w9WgXcQ',
+      title: 'Mastery Track'
     }, { status: 200 });
   }
 }
