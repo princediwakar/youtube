@@ -290,6 +290,7 @@ export default function VideoPlayer() {
       disablekb: 1,
       fs: 0,
       iv_load_policy: 3,
+      cc_load_policy: 0,
       origin: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
     },
   }), [fallbackMode]);
