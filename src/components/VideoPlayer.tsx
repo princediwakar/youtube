@@ -96,6 +96,11 @@ export default function VideoPlayer() {
   const onReady: YouTubeProps['onReady'] = React.useCallback((event: any) => {
     playerRef.current = event.target;
     setIsPlayerReady(true);
+    // Force captions off by default
+    try {
+      event.target.loadModule('captions');
+      event.target.setOption('captions', 'track', {});
+    } catch (e) {}
   }, []);
 
   const onStateChange: YouTubeProps['onStateChange'] = React.useCallback((event: any) => {
