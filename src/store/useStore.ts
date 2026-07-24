@@ -13,6 +13,7 @@ interface AppState {
   selectedDomain: string | null;
   currentSyllabus: DomainContent | null;
   isGenerating: boolean;
+  isGeneratingQuestions: boolean;
   theme: string;
   isTutorModeActive: boolean;
   tutorChatHistory: ChatMessage[];
@@ -22,6 +23,7 @@ interface AppState {
   setSelectedDomain: (domain: string) => void;
   setCurrentSyllabus: (syllabus: DomainContent) => void;
   setIsGenerating: (isGenerating: boolean) => void;
+  setIsGeneratingQuestions: (isGeneratingQuestions: boolean) => void;
   setTheme: (theme: string) => void;
   setIsTutorModeActive: (active: boolean) => void;
   addTutorMessage: (message: ChatMessage) => void;
@@ -36,6 +38,7 @@ export const useStore = create<AppState>()(
       selectedDomain: null,
       currentSyllabus: null,
       isGenerating: false,
+      isGeneratingQuestions: false,
       theme: 'star-chart',
       isTutorModeActive: false,
       tutorChatHistory: [],
@@ -45,6 +48,7 @@ export const useStore = create<AppState>()(
       setSelectedDomain: (domain: string) => set({ selectedDomain: domain }),
       setCurrentSyllabus: (syllabus: DomainContent) => set({ currentSyllabus: syllabus }),
       setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
+      setIsGeneratingQuestions: (isGeneratingQuestions: boolean) => set({ isGeneratingQuestions }),
       setTheme: (theme: string) => set({ theme }),
       setIsTutorModeActive: (active: boolean) => set({ isTutorModeActive: active }),
       addTutorMessage: (message: ChatMessage) => set((state: any) => ({ tutorChatHistory: [...state.tutorChatHistory, message] })),

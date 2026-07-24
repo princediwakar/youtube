@@ -3,10 +3,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import VideoPlayer from '@/components/VideoPlayer';
-import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3 } from 'lucide-react';
+import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3, Loader2 } from 'lucide-react';
 
 export default function ZenDashboard() {
-  const { score, setSelectedDomain, currentSyllabus } = useStore();
+  const { score, setSelectedDomain, currentSyllabus, isGeneratingQuestions } = useStore();
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState('');
   const [isMouseIdle, setIsMouseIdle] = useState(false);
@@ -49,6 +49,12 @@ export default function ZenDashboard() {
         </div>
         
         <div className="flex items-center gap-8">
+          {isGeneratingQuestions && (
+            <div className="flex items-center gap-2 text-slate-400 bg-slate-800/30 px-3 py-1.5 rounded-full border border-slate-700/50 animate-fade-in">
+              <Loader2 className="w-4 h-4 animate-spin text-[var(--color-theme-primary)]" />
+              <span className="text-xs font-medium">AI generating checkpoints...</span>
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Score</span>
             <span className="text-2xl font-black text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)] flex items-center gap-1">{score}</span>

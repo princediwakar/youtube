@@ -23,32 +23,51 @@ export default function Onboarding() {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
-    // Proceed to theme selection immediately, we will generate syllabus in parallel
+    // Proceed to theme selection immediately
     setStep(2);
     setIsGenerating(true);
     setErrorMsg('');
 
     try {
-      const response = await fetch('/api/generate-syllabus', {
+      const response = await fetch('/api/search-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery })
       });
 
       if (!response.ok) {
-        let errMsg = 'Failed to generate syllabus';
+        let errMsg = 'Failed to find video';
         try {
           const errorData = await response.json();
           if (errorData.error) errMsg = errorData.error;
-        } catch (e) {
-          // Keep default error message if json parsing fails
-        }
+        } catch (e) {}
         throw new Error(errMsg);
       }
 
-      const syllabus = await response.json();
-      setCurrentSyllabus(syllabus);
+      const { videoId, title } = await response.json();
+      
+      // Set initial syllabus with empty questions so the user can start watching
+      setCurrentSyllabus({ videoId, title, questions: [] });
       setSelectedDomain(searchQuery.toLowerCase().replace(/\s+/g, '-'));
+
+      // Background generation of questions
+      useStore.getState().setIsGeneratingQuestions(true);
+      fetch('/api/generate-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId, title, query: searchQuery })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.questions) {
+          useStore.getState().setCurrentSyllabus({ videoId, title, questions: data.questions });
+        }
+      })
+      .catch(err => console.error("Background question generation failed:", err))
+      .finally(() => {
+        useStore.getState().setIsGeneratingQuestions(false);
+      });
+
     } catch (error: any) {
       console.error(error);
       setErrorMsg(error.message || 'An unexpected error occurred. Please try again.');

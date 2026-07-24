@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-// @ts-ignore
-import ytSearch from 'yt-search';
 import { YoutubeTranscript } from 'youtube-transcript';
 import OpenAI from 'openai';
 
@@ -13,62 +11,18 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { query } = await req.json();
+    const { videoId, title, query } = await req.json();
 
-    if (!query) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 });
+    if (!videoId || !title) {
+      return NextResponse.json({ error: 'videoId and title are required' }, { status: 400 });
     }
 
-    console.log(`Generating syllabus for: ${query}`);
-
-
-    // 0. Check if the query is actually a direct YouTube URL
-    let explicitVideoId = null;
-    const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-    const match = query.match(ytRegex);
-    if (match && match[1]) {
-      explicitVideoId = match[1];
-      console.log(`Detected direct YouTube URL. Extracting ID: ${explicitVideoId}`);
-    }
-
-    let topVideo;
-
-    if (explicitVideoId) {
-      // If a URL was provided, bypass search and mock a topVideo object
-      topVideo = { videoId: explicitVideoId, title: "Custom Video URL" };
-    } else {
-      // 1. Search YouTube for the best educational video
-      // Append negative keywords to filter out regional content and force English
-      const advancedQuery = `${query} (course OR tutorial) English`;
-      const searchResult = await ytSearch(advancedQuery);
-      
-      // Filter out common mega-channels that dominate tech searches if the user wants diverse/western creators
-      const excludedChannels = ['apnacollege', 'chaiaurcode', 'simplilearn', 'edureka', 'codewithharry', 'telusko', 'krishnaik', 'geeksforgeeks', 'programmingwithmosh'];
-      
-      topVideo = searchResult.videos.find((video: any) => {
-        // Strip all whitespace from the channel name to make the match foolproof against spacing
-        const channelName = (video.author?.name?.toLowerCase() || '').replace(/\s+/g, '');
-        const title = (video.title?.toLowerCase() || '').replace(/\s+/g, '');
-        
-        // Skip if channel name is in our exclusion list
-        if (excludedChannels.some(excluded => channelName.includes(excluded))) return false;
-        
-        return true;
-      }) || searchResult.videos[0]; // fallback to first if all are filtered out
-    }
-
-
-    if (!topVideo) {
-      console.log('No video found, using fallback.');
-      topVideo = { videoId: 'dQw4w9WgXcQ', title: 'Fallback Video' };
-    }
-
-    console.log(`Found video: ${topVideo.title} (ID: ${topVideo.videoId})`);
+    console.log(`Generating questions for video: ${title} (ID: ${videoId}) with query: ${query}`);
 
     // 2. Fetch transcript
     let transcriptText = "";
     try {
-      const transcript = await YoutubeTranscript.fetchTranscript(topVideo.videoId);
+      const transcript = await YoutubeTranscript.fetchTranscript(videoId);
       transcriptText = transcript.map(t => t.text).join(' ').substring(0, 5000); // Limit to first 5000 chars for prompt length
     } catch (e) {
       console.log('Transcript failed, falling back to empty text');
@@ -78,8 +32,8 @@ export async function POST(req: Request) {
     // 3. Generate JSON with DeepSeek
     const prompt = `
       You are an expert educational AI designing an 11-star learning experience. 
-      Topic: ${query}
-      Video Title: ${topVideo.title}
+      Topic: ${query || title}
+      Video Title: ${title}
       Transcript Snippet: ${transcriptText}
 
       Create a learning syllabus that maps to this video.
@@ -88,8 +42,8 @@ export async function POST(req: Request) {
       
       Output MUST be a valid JSON object matching this schema exactly:
       {
-        "videoId": "${topVideo.videoId}",
-        "title": "Mastery Track: ${query}",
+        "videoId": "${videoId}",
+        "title": "Mastery Track: ${query || title}",
         "questions": [
           {
             "id": "q1",
@@ -136,18 +90,18 @@ export async function POST(req: Request) {
     } catch (parseError: any) {
       console.error("Failed to parse JSON. Raw content:", content);
       domainContent = {
-        title: "Mastery Track: " + query,
+        title: "Mastery Track: " + (query || title),
         questions: []
       };
     }
     
     // Ensure videoId matches what we found
-    domainContent.videoId = topVideo.videoId;
+    domainContent.videoId = videoId;
 
     return NextResponse.json(domainContent);
 
   } catch (error: any) {
-    console.error('Error generating syllabus:', error);
+    console.error('Error generating questions:', error);
     return NextResponse.json({
       videoId: "dQw4w9WgXcQ", 
       title: "Mastery Track",
