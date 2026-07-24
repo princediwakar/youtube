@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3 } from 'lucide-react';
@@ -9,6 +9,16 @@ export default function ZenDashboard() {
   const { masteryScore, setSelectedDomain, currentSyllabus } = useStore();
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState('');
+  const [isMouseIdle, setIsMouseIdle] = useState(false);
+  const hideCursorTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseMove = () => {
+    setIsMouseIdle(false);
+    if (hideCursorTimeout.current) clearTimeout(hideCursorTimeout.current);
+    hideCursorTimeout.current = setTimeout(() => {
+      setIsMouseIdle(true);
+    }, 2000);
+  };
   
   const questions = currentSyllabus?.questions || [];
 
@@ -19,7 +29,11 @@ export default function ZenDashboard() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[var(--color-theme-bg)] transition-colors duration-1000 p-4 md:p-8 flex flex-col font-sans" style={{ backgroundColor: 'var(--color-theme-bg, #020617)' }}>
+    <div 
+      className="min-h-screen bg-[var(--color-theme-bg)] transition-colors duration-1000 p-4 md:p-8 flex flex-col font-sans" 
+      style={{ backgroundColor: 'var(--color-theme-bg, #020617)' }}
+      onMouseMove={handleMouseMove}
+    >
       {/* Dynamic Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-[var(--color-theme-primary)] opacity-10 blur-[128px] pointer-events-none" />
 
@@ -27,7 +41,7 @@ export default function ZenDashboard() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setSelectedDomain('')}
-            className="p-2 text-slate-400 hover:text-white transition-transform hover:-translate-x-1"
+            className={`p-2 text-slate-400 hover:text-white transition-all duration-300 hover:-translate-x-1 ${isMouseIdle ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             title="Return to Dashboard"
           >
             <ChevronLeft className="w-8 h-8" />
@@ -42,24 +56,22 @@ export default function ZenDashboard() {
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-[1600px] mx-auto w-full animate-fade-in">
+      <main className="relative z-10 grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-[1600px] mx-auto w-full animate-fade-in">
         <div className="lg:col-span-3 relative group">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800/80 ring-1 ring-white/5 bg-black">
             <VideoPlayer />
           </div>
         </div>
         
-        <aside className="lg:col-span-1 h-full">
+        <aside className="lg:col-span-1 flex flex-col">
           {/* Study Notes */}
-          <div className="p-6 rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-800/60 shadow-2xl flex flex-col h-full min-h-[250px] animate-fade-in">
-            <h4 className="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-              <Edit3 className="w-4 h-4 text-amber-500" />
-              Study Notes
-            </h4>
+          <div className="flex-1 p-6 rounded-3xl bg-slate-800/20 backdrop-blur-2xl border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col min-h-[250px] animate-fade-in relative overflow-hidden group">
+            {/* Subtle inner glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-theme-primary)] opacity-5 blur-[80px] pointer-events-none transition-opacity group-focus-within:opacity-10" />
             <textarea 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Jot down insights here..."
+              placeholder="when your write, you understand better..."
               className="flex-1 w-full bg-transparent resize-none outline-none text-slate-300 text-sm placeholder-slate-700 font-mono leading-relaxed"
             />
           </div>

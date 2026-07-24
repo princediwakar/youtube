@@ -24,6 +24,8 @@ export default function VideoPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isMouseIdle, setIsMouseIdle] = useState(false);
+  const hideCursorTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // If in fallback mode, use a safe video ID
   const videoId = fallbackMode ? 'zjkBMFhNj_g' : (currentSyllabus?.videoId || 'zjkBMFhNj_g');
@@ -224,6 +226,19 @@ export default function VideoPlayer() {
     }
   };
 
+  const handleMouseMove = () => {
+    setIsMouseIdle(false);
+    if (hideCursorTimeout.current) clearTimeout(hideCursorTimeout.current);
+    hideCursorTimeout.current = setTimeout(() => {
+      setIsMouseIdle(true);
+    }, 2000);
+  };
+
+  const handleMouseLeave = () => {
+    setIsMouseIdle(false);
+    if (hideCursorTimeout.current) clearTimeout(hideCursorTimeout.current);
+  };
+
   const opts: YouTubeProps['opts'] = {
     height: '100%',
     width: '100%',
@@ -239,7 +254,12 @@ export default function VideoPlayer() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full aspect-video group bg-black overflow-hidden rounded-xl">
+    <div 
+      ref={containerRef} 
+      className={`relative w-full aspect-video group bg-black overflow-hidden rounded-xl ${isMouseIdle && isPlaying && !currentQuestion ? 'cursor-none' : ''}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="absolute inset-0 pointer-events-none z-0">
         <YouTube 
           videoId={videoId} 
@@ -255,14 +275,14 @@ export default function VideoPlayer() {
       {/* Invisible overlay to capture clicks and prevent YouTube native UI from showing on hover */}
       {hasStarted && !hasError && !currentQuestion && (
         <div 
-          className="absolute inset-0 z-10 cursor-pointer"
+          className={`absolute inset-0 z-10 ${isMouseIdle ? 'cursor-none' : 'cursor-pointer'}`}
           onClick={togglePlay}
         />
       )}
 
       {/* Top Right Fullscreen Button */}
       {hasStarted && !hasError && !currentQuestion && (
-        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+        <div className={`absolute top-4 right-4 transition-opacity duration-300 z-20 ${(isPlaying && isMouseIdle) ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
           <button 
             onClick={toggleFullScreen}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md transition-all border border-white/10 hover:border-white/30 shadow-lg"
@@ -275,7 +295,7 @@ export default function VideoPlayer() {
 
       {/* Custom Controls Overlay (Bottom Timeline) */}
       {hasStarted && !hasError && !currentQuestion && (
-        <div className={`absolute bottom-0 left-0 right-0 pb-0 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+        <div className={`absolute bottom-0 left-0 right-0 pb-0 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${(isPlaying && isMouseIdle) ? 'opacity-0' : (isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100')}`}>
           
           <div className="relative w-full h-10 group/scrub">
             {/* Fat-Finger Touch Target */}
