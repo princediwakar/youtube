@@ -6,7 +6,7 @@ import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import QuizOverlay from '@/components/QuizOverlay';
 import SessionComplete from '@/components/SessionComplete';
-import { Play, Pause, Maximize } from 'lucide-react';
+import { Play, Pause, Maximize, Minimize, Subtitles } from 'lucide-react';
 
 export default function VideoPlayer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,6 +27,8 @@ export default function VideoPlayer() {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMouseIdle, setIsMouseIdle] = useState(false);
+  const [isCCOn, setIsCCOn] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const hideCursorTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Freeze the videoId on first mount so background question updates
@@ -82,6 +84,14 @@ export default function VideoPlayer() {
 
     return () => clearInterval(interval);
   }, [isFlowMode, currentQuestion, answeredQuestions, questions, hasStarted, isPlaying, duration]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const onReady: YouTubeProps['onReady'] = React.useCallback((event: any) => {
     playerRef.current = event.target;
@@ -156,6 +166,23 @@ export default function VideoPlayer() {
     }
   };
 
+  const toggleCaptions = async () => {
+    if (!playerRef.current) return;
+    try {
+      playerRef.current.loadModule('captions');
+      const currentTrack = await playerRef.current.getOption('captions', 'track');
+      if (currentTrack && currentTrack.languageCode) {
+        playerRef.current.setOption('captions', 'track', {}); // disable
+        setIsCCOn(false);
+      } else {
+        playerRef.current.setOption('captions', 'track', { languageCode: 'en' }); // enable english
+        setIsCCOn(true);
+      }
+    } catch (err) {
+      console.log('Captions toggle failed', err);
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
       // Don't trigger shortcuts if user is typing in an input or textarea
@@ -199,17 +226,7 @@ export default function VideoPlayer() {
         }
         case 'c': {
           e.preventDefault();
-          try {
-            playerRef.current.loadModule('captions');
-            const currentTrack = await playerRef.current.getOption('captions', 'track');
-            if (currentTrack && currentTrack.languageCode) {
-              playerRef.current.setOption('captions', 'track', {}); // disable
-            } else {
-              playerRef.current.setOption('captions', 'track', { languageCode: 'en' }); // enable english
-            }
-          } catch (err) {
-            console.log('Captions toggle failed', err);
-          }
+          toggleCaptions();
           break;
         }
       }
@@ -305,23 +322,31 @@ export default function VideoPlayer() {
         />
       )}
 
-      {/* Top Right Fullscreen Button */}
-      {hasStarted && !currentQuestion && (
-        <div className={`absolute top-4 right-4 transition-opacity duration-300 z-20 ${(isPlaying && isMouseIdle) ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
-          <button 
-            onClick={toggleFullScreen}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md transition-all border border-white/10 hover:border-white/30 shadow-lg"
-            title="Full Screen"
-          >
-            <Maximize className="w-5 h-5" />
-          </button>
-        </div>
-      )}
+
 
       {/* Custom Controls Overlay (Bottom Timeline) */}
       {hasStarted && !currentQuestion && (
         <div className={`absolute bottom-0 left-0 right-0 pb-0 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${(isPlaying && isMouseIdle) ? 'opacity-0' : (isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100')}`}>
           
+          {/* Control Buttons */}
+          <div className="flex justify-end items-center gap-3 px-4 pb-2">
+            <button 
+              onClick={toggleCaptions}
+              className={`w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transition-all border shadow-lg ${isCCOn ? 'bg-amber-500/20 text-amber-400 border-amber-500/50' : 'bg-black/40 hover:bg-black/80 text-white/70 hover:text-white border-white/10 hover:border-white/30'}`}
+              title="Toggle Captions (C)"
+            >
+              <Subtitles className="w-5 h-5" />
+            </button>
+            
+            <button 
+              onClick={toggleFullScreen}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md transition-all border border-white/10 hover:border-white/30 shadow-lg"
+              title="Full Screen (F)"
+            >
+              {isFullScreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+            </button>
+          </div>
+
           <div className="relative w-full h-10 group/scrub">
             {/* Fat-Finger Touch Target */}
             <input 

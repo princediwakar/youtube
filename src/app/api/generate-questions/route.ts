@@ -44,6 +44,7 @@ export async function POST(req: Request) {
       {
         "videoId": "${videoId}",
         "title": "Mastery Track: ${query || title}",
+        "summaryNotes": "3-8 short bullet points summarizing the video based on the transcript snippet provided. Use plain text with bullets (-).",
         "questions": [
           {
             "id": "q1",
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
       }
       
       Respond ONLY with valid JSON. No markdown formatting.
-      CRITICAL: Ensure any code snippets properly escape newlines (\\n) and double quotes (\\") to remain valid JSON.
+      CRITICAL: Ensure any code snippets and summary notes properly escape newlines (\\n) and double quotes (\\") to remain valid JSON.
     `;
 
     const response = await openai.chat.completions.create({

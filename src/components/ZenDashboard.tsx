@@ -26,6 +26,12 @@ export default function ZenDashboard() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (currentSyllabus?.summaryNotes && notes === '') {
+      setNotes(currentSyllabus.summaryNotes);
+    }
+  }, [currentSyllabus?.summaryNotes]);
+
   if (!mounted) return null;
 
   return (

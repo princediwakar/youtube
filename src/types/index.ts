@@ -13,5 +13,6 @@ export interface Question {
 export interface DomainContent {
   videoId: string;
   title?: string;
+  summaryNotes?: string;
   questions: Question[];
 }
