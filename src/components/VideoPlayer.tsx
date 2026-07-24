@@ -170,23 +170,46 @@ export default function VideoPlayer() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full aspect-video group bg-black">
-      <div className="absolute inset-0 pointer-events-none">
+    <div ref={containerRef} className="relative w-full aspect-video group bg-black overflow-hidden rounded-xl">
+      <div className="absolute inset-0 pointer-events-none z-0">
         <YouTube 
           videoId={videoId} 
           opts={opts} 
           onReady={onReady} 
           onStateChange={onStateChange}
           onError={onError}
-          className="w-full h-full pointer-events-auto"
-          iframeClassName="w-full h-full"
+          className="w-full h-full pointer-events-none"
+          iframeClassName="w-full h-full pointer-events-none"
         />
       </div>
 
-      {/* Custom Controls Overlay */}
+      {/* Invisible overlay to capture clicks and prevent YouTube native UI from showing on hover */}
       {hasStarted && !hasError && !currentQuestion && (
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 flex flex-col justify-end">
-          <div className="relative w-full h-2 bg-slate-800/80 rounded-full mb-4 cursor-pointer overflow-hidden backdrop-blur-sm group/scrub">
+        <div 
+          className="absolute inset-0 z-10 cursor-pointer"
+          onClick={togglePlay}
+        />
+      )}
+
+      {/* Top Right Fullscreen Button */}
+      {hasStarted && !hasError && !currentQuestion && (
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+          <button 
+            onClick={toggleFullScreen}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md transition-all border border-white/10 hover:border-white/30 shadow-lg"
+            title="Full Screen"
+          >
+            <Maximize className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Custom Controls Overlay (Bottom Timeline) */}
+      {hasStarted && !hasError && !currentQuestion && (
+        <div className={`absolute bottom-0 left-0 right-0 px-8 pb-4 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+          
+          <div className="relative w-full h-10 flex items-center group/scrub">
+            {/* Fat-Finger Touch Target */}
             <input 
               type="range" 
               min="0" 
@@ -194,36 +217,26 @@ export default function VideoPlayer() {
               step="0.1"
               value={progress}
               onChange={handleSeek}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
             />
-            {/* Progress Fill */}
-            <div 
-              className="absolute top-0 left-0 h-full bg-[var(--color-theme-primary)] rounded-full"
-              style={{ width: `${progress}%` }}
-            />
+            
+            {/* Visual Track */}
+            <div className="relative w-full h-1 group-hover/scrub:h-2 transition-all duration-300 bg-white/20 rounded-full overflow-hidden z-10">
+              {/* Progress Fill */}
+              <div 
+                className="absolute top-0 left-0 h-full bg-white transition-all duration-100"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
             {/* Checkpoint Markers */}
             {duration > 0 && mockQuestions.map(q => (
               <div 
                 key={q.id}
-                className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full shadow-[0_0_8px_var(--color-theme-primary)] transition-colors ${answeredQuestions.has(q.id) ? 'bg-emerald-400' : 'bg-amber-400'}`}
-                style={{ left: `${(q.timestamp / duration) * 100}%` }}
+                className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full shadow-[0_0_8px_var(--color-theme-primary)] transition-colors z-20 pointer-events-none ${answeredQuestions.has(q.id) ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                style={{ left: `calc(${(q.timestamp / duration) * 100}% - 5px)` }}
               />
             ))}
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={togglePlay}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors"
-            >
-              {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
-            </button>
-            <button 
-              onClick={toggleFullScreen}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors"
-            >
-              <Maximize className="w-5 h-5" />
-            </button>
           </div>
         </div>
       )}

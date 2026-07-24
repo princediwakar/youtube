@@ -59,8 +59,6 @@ export default function ZenDashboard() {
 
       <main className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-[1600px] mx-auto w-full animate-fade-in">
         <div className="lg:col-span-3 relative group">
-          {/* Decorative video frame glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-theme-primary)] to-[var(--color-theme-primary-hover)] opacity-20 blur-xl rounded-3xl group-hover:opacity-30 transition-opacity duration-1000" />
           <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800/80 ring-1 ring-white/5 bg-black">
             <VideoPlayer />
           </div>

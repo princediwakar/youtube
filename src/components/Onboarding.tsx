@@ -83,7 +83,7 @@ export default function Onboarding() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="e.g., 'Advanced SQL Window Functions'"
+                  placeholder="Enter a topic or paste a YouTube video URL..."
                   className="w-full pl-14 pr-16 py-5 rounded-3xl border-2 text-white text-lg focus:outline-none focus:ring-4 transition-all bg-black/40 backdrop-blur-xl"
                   style={{ 
                     borderColor: 'var(--color-theme-border, #334155)',
@@ -92,8 +92,7 @@ export default function Onboarding() {
                 <button
                   type="submit"
                   disabled={!searchQuery.trim()}
-                  className="absolute right-3 p-3 text-white rounded-2xl transition-all disabled:opacity-30 disabled:scale-95 hover:scale-105"
-                  style={{ backgroundColor: 'var(--color-theme-primary, #6366f1)' }}
+                  className="absolute right-3 p-3 rounded-2xl transition-all disabled:scale-100 disabled:bg-slate-800 disabled:text-slate-500 bg-white text-black hover:bg-slate-200 hover:scale-105"
                 >
                   <ArrowRight className="w-6 h-6" />
                 </button>
