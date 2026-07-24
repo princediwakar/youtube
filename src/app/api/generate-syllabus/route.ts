@@ -39,22 +39,19 @@ export async function POST(req: Request) {
     } else {
       // 1. Search YouTube for the best educational video
       // Append negative keywords to filter out regional content and force English
-      const advancedQuery = `${query} (course OR tutorial) English -hindi -urdu`;
+      const advancedQuery = `${query} (course OR tutorial) English`;
       const searchResult = await ytSearch(advancedQuery);
       
       // Filter out common mega-channels that dominate tech searches if the user wants diverse/western creators
-      const excludedChannels = ['apnacollege', 'chaiaurcode', 'simplilearn', 'edureka', 'codewithharry', 'telusko', 'krishnaik', 'geeksforgeeks', 'programmingwithmosh', 'freecodecamp'];
+      const excludedChannels = ['apnacollege', 'chaiaurcode', 'simplilearn', 'edureka', 'codewithharry', 'telusko', 'krishnaik', 'geeksforgeeks', 'programmingwithmosh'];
       
       topVideo = searchResult.videos.find((video: any) => {
         // Strip all whitespace from the channel name to make the match foolproof against spacing
         const channelName = (video.author?.name?.toLowerCase() || '').replace(/\s+/g, '');
         const title = (video.title?.toLowerCase() || '').replace(/\s+/g, '');
-        const rawTitle = video.title?.toLowerCase() || '';
         
         // Skip if channel name is in our exclusion list
         if (excludedChannels.some(excluded => channelName.includes(excluded))) return false;
-        // Skip if title explicitly mentions hindi
-        if (rawTitle.includes('hindi') || rawTitle.includes('urdu') || rawTitle.includes('telugu') || rawTitle.includes('tamil')) return false;
         
         return true;
       }) || searchResult.videos[0]; // fallback to first if all are filtered out
