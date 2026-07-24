@@ -5,7 +5,7 @@ import YouTube, { YouTubeProps } from 'react-youtube';
 import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import QuizOverlay from '@/components/QuizOverlay';
-import { Play, Pause, AlertTriangle, RefreshCw, BrainCircuit, Maximize } from 'lucide-react';
+import { Play, Pause, AlertTriangle, RefreshCw, Maximize } from 'lucide-react';
 
 export default function VideoPlayer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -247,10 +247,7 @@ export default function VideoPlayer() {
           <div className="max-w-md w-full bg-slate-900/50 border border-slate-700/50 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-theme-primary)] opacity-10 blur-3xl rounded-full" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-[var(--color-theme-primary)] opacity-10 blur-3xl rounded-full" />
-            
-            <div className="w-16 h-16 rounded-full bg-[var(--color-theme-primary)]/20 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(var(--color-theme-primary-rgb),0.3)]">
-              <BrainCircuit className="w-8 h-8 text-[var(--color-theme-primary)]" />
-            </div>
+
             
             <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-wide">
               {selectedDomain ? selectedDomain.replace('-', ' ') : 'Coding'} Mastery

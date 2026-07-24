@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { 
-  Brain, Search, ArrowRight, Sparkles, Droplets, Zap, Flame, Loader2
+  Search, ArrowRight, Sparkles, Droplets, Zap, Flame, Loader2
 } from 'lucide-react';
 
 const themeOptions = [
@@ -17,6 +17,7 @@ export default function Onboarding() {
   const { setSelectedDomain, setCurrentSyllabus, setIsGenerating, setTheme, theme, isGenerating } = useStore();
   const [step, setStep] = useState<1 | 2>(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ export default function Onboarding() {
     // Proceed to theme selection immediately, we will generate syllabus in parallel
     setStep(2);
     setIsGenerating(true);
+    setErrorMsg('');
 
     try {
       const response = await fetch('/api/generate-syllabus', {
@@ -34,15 +36,23 @@ export default function Onboarding() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate syllabus');
+        let errMsg = 'Failed to generate syllabus';
+        try {
+          const errorData = await response.json();
+          if (errorData.error) errMsg = errorData.error;
+        } catch (e) {
+          // Keep default error message if json parsing fails
+        }
+        throw new Error(errMsg);
       }
 
       const syllabus = await response.json();
       setCurrentSyllabus(syllabus);
       setSelectedDomain(searchQuery.toLowerCase().replace(/\s+/g, '-'));
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      // Fallback or error handling can go here
+      setErrorMsg(error.message || 'An unexpected error occurred. Please try again.');
+      setStep(1); // Send them back to step 1 to see the error
     } finally {
       setIsGenerating(false);
     }
@@ -61,11 +71,6 @@ export default function Onboarding() {
 
       <div className="max-w-5xl w-full space-y-12 relative z-10">
         <div className="text-center space-y-6 animate-fade-in">
-          <div className="flex justify-center mb-8">
-            <div className="w-24 h-24 bg-[var(--color-theme-surface)] rounded-2xl flex items-center justify-center border border-[var(--color-theme-border)] shadow-2xl animate-pulse-glow" style={{ backgroundColor: 'var(--color-theme-surface, #0f172a)', borderColor: 'var(--color-theme-border, #334155)' }}>
-              <Brain className="w-12 h-12" style={{ color: 'var(--color-theme-primary, #6366f1)' }} />
-            </div>
-          </div>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight bg-gradient-to-br from-white via-white to-slate-500 bg-clip-text text-transparent">
             {step === 1 ? 'What do you want to master today?' : 'Set Your Atmosphere'}
           </h1>
@@ -98,6 +103,12 @@ export default function Onboarding() {
                 </button>
               </div>
             </form>
+            
+            {errorMsg && (
+              <div className="max-w-2xl mx-auto p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-center animate-fade-in shadow-lg">
+                <p className="font-medium">{errorMsg}</p>
+              </div>
+            )}
           </div>
         )}
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from '@/store/useStore';
 import VideoPlayer from '@/components/VideoPlayer';
-import { Brain, Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3 } from 'lucide-react';
+import {  Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3 } from 'lucide-react';
 
 export default function ZenDashboard() {
   const { isFlowMode, toggleFlowMode, masteryScore, setSelectedDomain, currentSyllabus } = useStore();
