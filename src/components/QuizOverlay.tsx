@@ -81,6 +81,10 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
         question={question}
         wrongAnswer={answer}
         onReturnToQuiz={handleReturnToQuiz}
+        onResumeVideo={() => {
+          setIsTutorModeActive(false);
+          onSkip();
+        }}
       />
     );
   }

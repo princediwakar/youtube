@@ -7,9 +7,10 @@ interface TutorModeProps {
   question: Question;
   wrongAnswer: string;
   onReturnToQuiz: () => void;
+  onResumeVideo: () => void;
 }
 
-export default function TutorMode({ question, wrongAnswer, onReturnToQuiz }: TutorModeProps) {
+export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onResumeVideo }: TutorModeProps) {
   const { tutorChatHistory, addTutorMessage, clearTutorChat } = useStore();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -105,7 +106,7 @@ export default function TutorMode({ question, wrongAnswer, onReturnToQuiz }: Tut
                   <button 
                     onClick={() => {
                       clearTutorChat();
-                      onReturnToQuiz();
+                      onResumeVideo();
                     }}
                     className="relative z-10 mt-6 px-6 py-3 bg-[var(--color-theme-primary)] text-slate-900 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-lg cursor-pointer"
                   >

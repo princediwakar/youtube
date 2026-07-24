@@ -275,9 +275,9 @@ export default function VideoPlayer() {
 
       {/* Custom Controls Overlay (Bottom Timeline) */}
       {hasStarted && !hasError && !currentQuestion && (
-        <div className={`absolute bottom-0 left-0 right-0 px-8 pb-4 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+        <div className={`absolute bottom-0 left-0 right-0 pb-0 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
           
-          <div className="relative w-full h-10 flex items-center group/scrub">
+          <div className="relative w-full h-10 group/scrub">
             {/* Fat-Finger Touch Target */}
             <input 
               type="range" 
@@ -290,7 +290,7 @@ export default function VideoPlayer() {
             />
             
             {/* Visual Track */}
-            <div className="relative w-full h-1 group-hover/scrub:h-2 transition-all duration-300 bg-white/20 rounded-full overflow-hidden z-10">
+            <div className="absolute bottom-0 left-0 w-full h-2 group-hover/scrub:h-3 transition-all duration-300 bg-white/20 overflow-hidden z-10">
               {/* Progress Fill */}
               <div 
                 className="absolute top-0 left-0 h-full bg-white transition-all duration-100"
@@ -302,7 +302,7 @@ export default function VideoPlayer() {
             {duration > 0 && questions.map(q => (
               <div 
                 key={q.id}
-                className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full shadow-[0_0_8px_var(--color-theme-primary)] transition-colors z-20 pointer-events-none ${answeredQuestions.has(q.id) ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                className={`absolute bottom-0 w-2.5 h-2.5 rounded-full shadow-[0_0_8px_var(--color-theme-primary)] transition-colors z-20 pointer-events-none ${answeredQuestions.has(q.id) ? 'bg-emerald-400' : 'bg-amber-400'}`}
                 style={{ left: `calc(${(q.timestamp / duration) * 100}% - 5px)` }}
               />
             ))}
