@@ -38,13 +38,17 @@ export async function POST(req: Request) {
       
       // Filter out common mega-channels that dominate tech searches if the user wants diverse/western creators
       const excludedChannels = ['apnacollege', 'chaiaurcode', 'simplilearn', 'edureka', 'codewithharry', 'telusko', 'krishnaik', 'geeksforgeeks', 'programmingwithmosh'];
+      const nonEnglishTitleKeywords = ['hindi', 'हिंदी', 'urdu', 'bangla', 'tamil', 'telugu', 'marathi', 'punjabi', 'gujarati', 'kannada', 'malayalam', 'français', 'español', 'deutsch', 'italiano', 'português', 'türkçe', 'русский', '日本語', '中文', '한국어', '阿拉伯'];
       
       topVideo = searchResult.videos.find((video: any) => {
-        // Strip all whitespace from the channel name to make the match foolproof against spacing
         const channelName = (video.author?.name?.toLowerCase() || '').replace(/\s+/g, '');
+        const title = video.title?.toLowerCase() || '';
         
         // Skip if channel name is in our exclusion list
         if (excludedChannels.some(excluded => channelName.includes(excluded))) return false;
+        
+        // Skip if the video title contains non-English language indicators
+        if (nonEnglishTitleKeywords.some(kw => title.includes(kw.toLowerCase()))) return false;
         
         return true;
       }) || searchResult.videos[0]; // fallback to first if all are filtered out

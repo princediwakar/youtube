@@ -6,7 +6,7 @@ import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import QuizOverlay from '@/components/QuizOverlay';
 import SessionComplete from '@/components/SessionComplete';
-import { Play, Pause, AlertTriangle, RefreshCw, Maximize } from 'lucide-react';
+import { Play, Pause, Maximize } from 'lucide-react';
 
 export default function VideoPlayer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,7 +17,6 @@ export default function VideoPlayer() {
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
   const [hasStarted, setHasStarted] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
-  const [hasError, setHasError] = useState(false);
   const [fallbackMode, setFallbackMode] = useState(false);
   const [autoStartCountdown, setAutoStartCountdown] = useState(4);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
@@ -93,7 +92,8 @@ export default function VideoPlayer() {
   };
 
   const onError: YouTubeProps['onError'] = () => {
-    setHasError(true);
+    // Silently ignore embedding errors; the video simply won't play
+    console.warn('YouTube player error — video may not support embedding.');
   };
 
   const handleStartSession = () => {
@@ -105,7 +105,7 @@ export default function VideoPlayer() {
 
   // Auto-start countdown logic
   useEffect(() => {
-    if (hasStarted || hasError || !isPlayerReady) return;
+    if (hasStarted || !isPlayerReady) return;
 
     if (questions.length === 0) {
       handleStartSession();
@@ -118,13 +118,8 @@ export default function VideoPlayer() {
     }
     const timer = setTimeout(() => setAutoStartCountdown(c => c - 1), 1000);
     return () => clearTimeout(timer);
-  }, [autoStartCountdown, hasStarted, hasError, isPlayerReady, questions.length]);
+  }, [autoStartCountdown, hasStarted, isPlayerReady, questions.length]);
 
-  const handleFallback = () => {
-    setFallbackMode(true);
-    setHasError(false);
-    setHasStarted(true); // Auto-start the fallback
-  };
 
   const handleQuizPass = (questionId: string) => {
     setAnsweredQuestions(new Set(answeredQuestions).add(questionId));
@@ -286,7 +281,7 @@ export default function VideoPlayer() {
       </div>
 
       {/* Invisible overlay to capture clicks and prevent YouTube native UI from showing on hover */}
-      {hasStarted && !hasError && !currentQuestion && (
+      {hasStarted && !currentQuestion && (
         <div 
           className={`absolute inset-0 z-10 ${isMouseIdle ? 'cursor-none' : 'cursor-pointer'}`}
           onClick={togglePlay}
@@ -294,7 +289,7 @@ export default function VideoPlayer() {
       )}
 
       {/* Top Right Fullscreen Button */}
-      {hasStarted && !hasError && !currentQuestion && (
+      {hasStarted && !currentQuestion && (
         <div className={`absolute top-4 right-4 transition-opacity duration-300 z-20 ${(isPlaying && isMouseIdle) ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
           <button 
             onClick={toggleFullScreen}
@@ -307,7 +302,7 @@ export default function VideoPlayer() {
       )}
 
       {/* Custom Controls Overlay (Bottom Timeline) */}
-      {hasStarted && !hasError && !currentQuestion && (
+      {hasStarted && !currentQuestion && (
         <div className={`absolute bottom-0 left-0 right-0 pb-0 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${(isPlaying && isMouseIdle) ? 'opacity-0' : (isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100')}`}>
           
           <div className="relative w-full h-10 group/scrub">
@@ -367,26 +362,6 @@ export default function VideoPlayer() {
               Start Mission ({autoStartCountdown})
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Error Fallback Overlay */}
-      {hasError && (
-        <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl z-30 flex flex-col items-center justify-center p-8 animate-fade-in">
-          <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-6">
-            <AlertTriangle className="w-10 h-10 text-red-500 animate-pulse" />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-3">Signal Lost</h2>
-          <p className="text-slate-400 text-center max-w-md mb-8">
-            The source video restricted external embedding. Would you like to load a safe simulation to continue testing the engine?
-          </p>
-          <button 
-            onClick={handleFallback}
-            className="py-3 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors border border-slate-600 flex items-center gap-2 cursor-pointer"
-          >
-            <RefreshCw className="w-5 h-5" />
-            Load Fallback Simulation
-          </button>
         </div>
       )}
 
