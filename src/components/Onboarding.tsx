@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { 
-  Search, ArrowRight, Sparkles, Droplets, Zap, Flame, Loader2
+  Search, ArrowRight, Sparkles, Droplets, Zap, Flame, Loader2, Moon
 } from 'lucide-react';
-
 const themeOptions = [
   { id: 'star-chart', label: 'Star Chart', tagline: 'For the night owl. Deep space focus.', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]' },
   { id: 'neon-cyber', label: 'Neon Cyber', tagline: 'High energy. Late night grind.', icon: Zap, color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(217,70,239,0.3)]' },
   { id: 'deep-ocean', label: 'Deep Ocean', tagline: 'Calm and steady. No distractions.', icon: Droplets, color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(20,184,166,0.3)]' },
-  { id: 'ember-minimal', label: 'Ember Minimal', tagline: 'Warm. Low stakes. Just vibes.', icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(249,115,22,0.3)]' }
+  { id: 'ember-minimal', label: 'Ember Minimal', tagline: 'Warm. Low stakes. Just vibes.', icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(249,115,22,0.3)]' },
+  { id: 'obsidian', label: 'Obsidian', tagline: 'Pure dark mode. Ultimate focus.', icon: Moon, color: 'text-zinc-400', bg: 'bg-zinc-500/10', border: 'border-zinc-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(161,161,170,0.3)]' }
 ];
 
 const searchSuggestions = [
@@ -33,6 +33,8 @@ export default function Onboarding() {
     if (e) e.preventDefault();
     const query = term || searchQuery;
     if (!query.trim()) return;
+
+    if (term) setSearchQuery(term);
 
     // Show loading state on the same screen
     setIsGenerating(true);
@@ -98,18 +100,23 @@ export default function Onboarding() {
 
       {/* Minimal Theme Selector at Top Right */}
       <div className="absolute top-6 right-6 flex items-center gap-3 z-50">
-        {themeOptions.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTheme(t.id)}
-            title={t.label}
-            className={`w-8 h-8 rounded-full ${t.bg} flex items-center justify-center transition-all duration-300 hover:scale-110 ${
-              theme === t.id ? `ring-2 ring-offset-2 ring-offset-[var(--color-theme-bg)] ${t.border}` : 'opacity-50 hover:opacity-100'
-            }`}
-          >
-            <t.icon className={`w-4 h-4 ${t.color}`} />
-          </button>
-        ))}
+        {themeOptions.map((t) => {
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTheme(t.id)}
+              title={t.label}
+              className={`w-8 h-8 rounded-full ${t.bg} flex items-center justify-center transition-all duration-300 ${
+                theme === t.id 
+                  ? 'opacity-100 scale-110 shadow-lg' 
+                  : 'opacity-40 hover:opacity-80 hover:scale-105'
+              }`}
+            >
+              <Icon className={`w-4 h-4 ${t.color}`} />
+            </button>
+          );
+        })}
       </div>
 
       <div className="max-w-5xl w-full space-y-12 relative z-10">
@@ -118,7 +125,7 @@ export default function Onboarding() {
             What do you want to master today?
           </h1>
           <p className="text-xl md:text-2xl max-w-2xl mx-auto font-light" style={{ color: 'var(--color-theme-text-muted, #94a3b8)' }}>
-            Enter any topic, from History and Literature to Finance and AI, and we will build your syllabus.
+            Drop a topic or paste a YouTube link below to instantly start learning.
           </p>
         </div>
 
