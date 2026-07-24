@@ -10,6 +10,7 @@ export interface ChatMessage {
 interface AppState {
   isFlowMode: boolean;
   score: number;
+  streak: number;
   selectedDomain: string | null;
   currentSyllabus: DomainContent | null;
   isGenerating: boolean;
@@ -20,6 +21,8 @@ interface AppState {
   
   toggleFlowMode: () => void;
   incrementScore: () => void;
+  incrementStreak: () => void;
+  resetStreak: () => void;
   setSelectedDomain: (domain: string) => void;
   setCurrentSyllabus: (syllabus: DomainContent) => void;
   setIsGenerating: (isGenerating: boolean) => void;
@@ -35,6 +38,7 @@ export const useStore = create<AppState>()(
     (set: any): AppState => ({
       isFlowMode: false,
       score: 0,
+      streak: 0,
       selectedDomain: null,
       currentSyllabus: null,
       isGenerating: false,
@@ -45,6 +49,8 @@ export const useStore = create<AppState>()(
       
       toggleFlowMode: () => set((state: any) => ({ isFlowMode: !state.isFlowMode })),
       incrementScore: () => set((state: any) => ({ score: state.score + 1 })),
+      incrementStreak: () => set((state: any) => ({ streak: state.streak + 1 })),
+      resetStreak: () => set({ streak: 0 }),
       setSelectedDomain: (domain: string) => set({ selectedDomain: domain }),
       setCurrentSyllabus: (syllabus: DomainContent) => set({ currentSyllabus: syllabus }),
       setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),

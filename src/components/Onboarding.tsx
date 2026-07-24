@@ -7,32 +7,47 @@ import {
 } from 'lucide-react';
 
 const themeOptions = [
-  { id: 'star-chart', label: 'Star Chart', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]' },
-  { id: 'neon-cyber', label: 'Neon Cyber', icon: Zap, color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(217,70,239,0.3)]' },
-  { id: 'deep-ocean', label: 'Deep Ocean', icon: Droplets, color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(20,184,166,0.3)]' },
-  { id: 'ember-minimal', label: 'Ember Minimal', icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(249,115,22,0.3)]' }
+  { id: 'star-chart', label: 'Star Chart', tagline: 'For the night owl. Deep space focus.', icon: Sparkles, color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]' },
+  { id: 'neon-cyber', label: 'Neon Cyber', tagline: 'High energy. Late night grind.', icon: Zap, color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', border: 'border-fuchsia-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(217,70,239,0.3)]' },
+  { id: 'deep-ocean', label: 'Deep Ocean', tagline: 'Calm and steady. No distractions.', icon: Droplets, color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(20,184,166,0.3)]' },
+  { id: 'ember-minimal', label: 'Ember Minimal', tagline: 'Warm. Low stakes. Just vibes.', icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500', hoverGlow: 'hover:shadow-[0_0_20px_rgba(249,115,22,0.3)]' }
+];
+
+const searchSuggestions = [
+  "How money really works",
+  "Quantum physics in 20 min",
+  "Negotiation tactics",
+  "CRISPR explained",
+  "Music theory basics",
+  "How the stock market works"
 ];
 
 export default function Onboarding() {
-  const { setSelectedDomain, setCurrentSyllabus, setIsGenerating, setTheme, theme, isGenerating } = useStore();
+  const { setSelectedDomain, currentSyllabus, setCurrentSyllabus, setIsGenerating, setTheme, theme, isGenerating } = useStore();
   const [step, setStep] = useState<1 | 2>(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  const [searchStatus, setSearchStatus] = useState<'idle' | 'searching' | 'found'>('idle');
+
+  const handleSearch = async (e?: React.FormEvent, term?: string) => {
+    if (e) e.preventDefault();
+    const query = term || searchQuery;
+    if (!query.trim()) return;
+
+    if (term) setSearchQuery(term);
 
     // Proceed to theme selection immediately
     setStep(2);
     setIsGenerating(true);
+    setSearchStatus('searching');
     setErrorMsg('');
 
     try {
       const response = await fetch('/api/search-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchQuery })
+        body: JSON.stringify({ query })
       });
 
       if (!response.ok) {
@@ -45,17 +60,18 @@ export default function Onboarding() {
       }
 
       const { videoId, title } = await response.json();
+      setSearchStatus('found');
       
       // Set initial syllabus with empty questions so the user can start watching
       setCurrentSyllabus({ videoId, title, questions: [] });
-      setSelectedDomain(searchQuery.toLowerCase().replace(/\s+/g, '-'));
+      setSelectedDomain(query.toLowerCase().replace(/\s+/g, '-'));
 
       // Background generation of questions
       useStore.getState().setIsGeneratingQuestions(true);
       fetch('/api/generate-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoId, title, query: searchQuery })
+        body: JSON.stringify({ videoId, title, query })
       })
       .then(res => res.json())
       .then(data => {
@@ -72,6 +88,7 @@ export default function Onboarding() {
       console.error(error);
       setErrorMsg(error.message || 'An unexpected error occurred. Please try again.');
       setStep(1); // Send them back to step 1 to see the error
+      setSearchStatus('idle');
     } finally {
       setIsGenerating(false);
     }
@@ -122,6 +139,19 @@ export default function Onboarding() {
                 </button>
               </div>
             </form>
+
+            {/* Curated Suggestions */}
+            <div className="max-w-2xl mx-auto flex flex-wrap gap-2 justify-center animate-fade-in" style={{ animationDelay: '200ms' }}>
+              {searchSuggestions.map((suggestion, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSearch(undefined, suggestion)}
+                  className="px-4 py-2 rounded-full border border-slate-700/50 bg-slate-800/30 text-slate-300 text-sm hover:bg-[var(--color-theme-primary)]/20 hover:text-[var(--color-theme-primary)] hover:border-[var(--color-theme-primary)]/50 transition-all duration-300"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
             
             {errorMsg && (
               <div className="max-w-2xl mx-auto p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-center animate-fade-in shadow-lg">
@@ -133,6 +163,22 @@ export default function Onboarding() {
 
         {step === 2 && (
           <div className="flex flex-col items-center animate-slide-up space-y-12">
+            
+            {/* Transparent Loading Banner */}
+            <div className={`flex items-center gap-3 px-6 py-3 rounded-full border transition-all duration-500 ${
+              searchStatus === 'found' 
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                : 'bg-slate-800/50 border-slate-700/50 text-slate-300'
+            }`}>
+              {searchStatus === 'searching' && <Loader2 className="w-5 h-5 animate-spin text-[var(--color-theme-primary)]" />}
+              {searchStatus === 'found' && <Zap className="w-5 h-5" />}
+              <span className="font-medium">
+                {searchStatus === 'searching' 
+                  ? `Finding the best video for "${searchQuery}"...` 
+                  : `Found: ${currentSyllabus?.title || 'Video ready'}`
+                }
+              </span>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto">
               {themeOptions.map((t, idx) => {
                 const Icon = t.icon;
@@ -155,19 +201,12 @@ export default function Onboarding() {
                     </div>
                     <div className="text-left">
                       <h3 className="text-2xl font-bold mb-1 text-white tracking-tight">{t.label}</h3>
-                      <p className="text-slate-400 font-medium">Click to enter Zen mode</p>
+                      <p className="text-slate-400 font-medium text-sm">{t.tagline}</p>
                     </div>
                   </button>
                 );
               })}
             </div>
-            
-            {isGenerating && (
-              <div className="mt-8 flex flex-col items-center space-y-4 animate-pulse">
-                <Loader2 className="w-8 h-8 text-[var(--color-theme-primary)] animate-spin" />
-                <p className="text-slate-400 font-medium">Generating your customized learning path...</p>
-              </div>
-            )}
           </div>
         )}
       </div>

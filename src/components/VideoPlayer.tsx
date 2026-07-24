@@ -5,6 +5,7 @@ import YouTube, { YouTubeProps } from 'react-youtube';
 import { Question } from '@/types';
 import { useStore } from '@/store/useStore';
 import QuizOverlay from '@/components/QuizOverlay';
+import SessionComplete from '@/components/SessionComplete';
 import { Play, Pause, AlertTriangle, RefreshCw, Maximize } from 'lucide-react';
 
 export default function VideoPlayer() {
@@ -15,6 +16,7 @@ export default function VideoPlayer() {
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
   const [hasStarted, setHasStarted] = useState(false);
+  const [sessionComplete, setSessionComplete] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [fallbackMode, setFallbackMode] = useState(false);
   const [autoStartCountdown, setAutoStartCountdown] = useState(4);
@@ -84,7 +86,10 @@ export default function VideoPlayer() {
 
   const onStateChange: YouTubeProps['onStateChange'] = (event: any) => {
     if (event.data === 1) setIsPlaying(true);
-    else if (event.data === 2 || event.data === 0) setIsPlaying(false);
+    else if (event.data === 2 || event.data === 0) {
+      setIsPlaying(false);
+      if (event.data === 0) setSessionComplete(true);
+    }
   };
 
   const onError: YouTubeProps['onError'] = () => {
@@ -256,7 +261,8 @@ export default function VideoPlayer() {
       controls: 0,
       disablekb: 1,
       fs: 0,
-      iv_load_policy: 3
+      iv_load_policy: 3,
+      origin: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
     },
   };
 
@@ -349,8 +355,8 @@ export default function VideoPlayer() {
               {selectedDomain ? selectedDomain.replace('-', ' ') : 'Coding'} Mastery
             </h2>
             <p className="text-slate-400 mb-8">
-              This module contains <strong className="text-white">{questions.length} conceptual checkpoints</strong>. 
-              The engine will automatically pause to test your recall.
+              This module contains <strong className="text-white">{questions.length} Flashpoints</strong>. 
+              The video will auto-pause to challenge you.
             </p>
             
             <button 
@@ -358,7 +364,7 @@ export default function VideoPlayer() {
               className="w-full py-4 px-6 rounded-2xl bg-[var(--color-theme-primary)] hover:bg-[var(--color-theme-primary-hover)] text-slate-950 font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_var(--color-theme-primary)] flex items-center justify-center gap-2 cursor-pointer"
             >
               <Play className="w-5 h-5 fill-current" />
-              Start Learning Session ({autoStartCountdown})
+              Start Mission ({autoStartCountdown})
             </button>
           </div>
         </div>
@@ -393,6 +399,11 @@ export default function VideoPlayer() {
             onSkip={() => handleSkip(currentQuestion.id)}
           />
         </div>
+      )}
+
+      {/* Session Complete Overlay */}
+      {sessionComplete && (
+        <SessionComplete />
       )}
     </div>
   );

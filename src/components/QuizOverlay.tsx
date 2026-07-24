@@ -101,7 +101,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
       <div className="relative z-10 flex justify-between items-start mb-8">
         <h3 className="text-sm uppercase tracking-widest font-black text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-theme-primary)] to-[var(--color-theme-primary-hover)] flex items-center gap-2">
           <Zap className="w-4 h-4 text-[var(--color-theme-primary)]" />
-          Concept Check
+          Quick Fire
         </h3>
         <div className="flex items-center gap-3">
           <button 
@@ -109,7 +109,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
             className="flex items-center gap-1 text-xs px-4 py-2 rounded-full bg-[var(--color-theme-primary)]/10 text-[var(--color-theme-primary)] hover:bg-[var(--color-theme-primary)]/20 transition-all font-bold border border-[var(--color-theme-primary)]/20 shadow-[0_0_15px_var(--color-theme-glow)]"
           >
             <HelpCircle className="w-3 h-3" />
-            Decode
+            Hint
           </button>
           <button 
             onClick={onSkip}
@@ -143,6 +143,15 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
                   </span>
                 </button>
               ))}
+              <div className="col-span-1 md:col-span-2 flex justify-center mt-2">
+                <button
+                  type="button"
+                  onClick={handleDecodeRequest}
+                  className="px-6 py-2 rounded-full border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-800 transition-all text-sm font-medium"
+                >
+                  Not sure
+                </button>
+              </div>
             </div>
           )}
 
@@ -198,7 +207,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
               <CheckCircle2 className="w-12 h-12 text-emerald-400 animate-bounce" />
             </div>
             <div className="text-center">
-              <p className="text-emerald-400 font-black text-3xl mb-1 tracking-tight">Checkpoint Passed</p>
+              <p className="text-emerald-400 font-black text-3xl mb-1 tracking-tight">🔥 Locked In</p>
               <p className="text-emerald-500/80 font-medium">Resuming video...</p>
             </div>
           </div>

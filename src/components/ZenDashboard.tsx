@@ -3,10 +3,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import VideoPlayer from '@/components/VideoPlayer';
-import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3, Loader2 } from 'lucide-react';
+import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3, Loader2, Flame } from 'lucide-react';
 
 export default function ZenDashboard() {
-  const { score, setSelectedDomain, currentSyllabus, isGeneratingQuestions } = useStore();
+  const { score, streak, setSelectedDomain, currentSyllabus, isGeneratingQuestions } = useStore();
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState('');
   const [isMouseIdle, setIsMouseIdle] = useState(false);
@@ -55,9 +55,17 @@ export default function ZenDashboard() {
               <span className="text-xs font-medium">AI generating checkpoints...</span>
             </div>
           )}
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Score</span>
-            <span className="text-2xl font-black text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)] flex items-center gap-1">{score}</span>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 cursor-help" title="Your learning streak. Completing missions keeps it alive!">
+              <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Streak</span>
+              <span className="text-xl font-bold text-orange-500 flex items-center gap-1">
+                {streak} <Flame className="w-4 h-4" />
+              </span>
+            </div>
+            <div className="flex items-center gap-3 bg-amber-500/10 px-4 py-2 rounded-full border border-amber-500/20 cursor-help" title="Experience Points (XP) earned by answering questions and completing missions">
+              <span className="text-xs text-amber-500 uppercase tracking-widest font-bold">XP</span>
+              <span className="text-2xl font-black text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)] flex items-center gap-1">{score}</span>
+            </div>
           </div>
         </div>
       </header>
@@ -74,12 +82,24 @@ export default function ZenDashboard() {
           <div className="flex-1 p-6 rounded-3xl bg-slate-800/20 backdrop-blur-2xl border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col min-h-[250px] animate-fade-in relative overflow-hidden group">
             {/* Subtle inner glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-theme-primary)] opacity-5 blur-[80px] pointer-events-none transition-opacity group-focus-within:opacity-10" />
-            <textarea 
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="when your write, you understand better..."
-              className="flex-1 w-full bg-transparent resize-none outline-none text-slate-300 text-sm placeholder-slate-700 font-mono leading-relaxed"
-            />
+            <div className="relative flex-1 flex flex-col group/notes z-10">
+              {notes.length === 0 && (
+                <div className="absolute inset-0 pointer-events-none p-4 flex flex-col gap-4 opacity-50 group-focus-within/notes:opacity-20 transition-opacity">
+                  <p className="text-slate-400 font-medium text-sm mb-2">{currentSyllabus?.title ? `Notes on: ${currentSyllabus.title}` : 'Topic Notes'}</p>
+                  <div className="space-y-3 text-xs text-slate-500/80 font-mono">
+                    <p>💡 What's one thing you didn't know before this?</p>
+                    <p>❓ What question does this raise for you?</p>
+                    <p>🔗 How does this connect to something you already know?</p>
+                  </div>
+                </div>
+              )}
+              <textarea 
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="flex-1 w-full bg-transparent resize-none outline-none text-slate-300 text-sm placeholder-transparent font-mono leading-relaxed p-4 z-10 relative"
+                placeholder="when you write, you understand better..."
+              />
+            </div>
           </div>
         </aside>
       </main>

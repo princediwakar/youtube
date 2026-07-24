@@ -85,6 +85,7 @@ export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onRes
         {/* Initial context message showing what went wrong */}
         {!isInsightRequest && (
           <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+            <p className="text-amber-400 font-bold mb-4 text-lg">Close! Here's what you were missing...</p>
             <p className="text-slate-400 text-sm mb-2">Original Question:</p>
             <p className="text-white font-medium mb-3">{question.text}</p>
             <div className="flex items-center gap-2 text-sm">
