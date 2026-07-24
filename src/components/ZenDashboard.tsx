@@ -62,15 +62,21 @@ export default function ZenDashboard() {
             </div>
           )}
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 cursor-help" title="Your learning streak. Completing missions keeps it alive!">
+            <div className="flex items-center gap-2 cursor-help relative group">
               <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Streak</span>
               <span className="text-xl font-bold text-orange-500 flex items-center gap-1">
                 {streak} <Flame className="w-4 h-4" />
               </span>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                Your learning streak. Completing missions keeps it alive!
+              </div>
             </div>
-            <div className="flex items-center gap-3 bg-amber-500/10 px-4 py-2 rounded-full border border-amber-500/20 cursor-help" title="Experience Points (XP) earned by answering questions and completing missions">
+            <div className="flex items-center gap-3 bg-amber-500/10 px-4 py-2 rounded-full border border-amber-500/20 cursor-help relative group">
               <span className="text-xs text-amber-500 uppercase tracking-widest font-bold">XP</span>
               <span className="text-2xl font-black text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)] flex items-center gap-1">{score}</span>
+              <div className="absolute top-full right-0 mt-2 px-3 py-2 bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                Experience Points (XP) earned by answering questions and completing missions
+              </div>
             </div>
           </div>
         </div>

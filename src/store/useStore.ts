@@ -38,7 +38,7 @@ export const useStore = create<AppState>()(
     (set: any): AppState => ({
       isFlowMode: false,
       score: 0,
-      streak: 0,
+      streak: 1,
       selectedDomain: null,
       currentSyllabus: null,
       isGenerating: false,
@@ -50,7 +50,7 @@ export const useStore = create<AppState>()(
       toggleFlowMode: () => set((state: any) => ({ isFlowMode: !state.isFlowMode })),
       incrementScore: () => set((state: any) => ({ score: state.score + 1 })),
       incrementStreak: () => set((state: any) => ({ streak: state.streak + 1 })),
-      resetStreak: () => set({ streak: 0 }),
+      resetStreak: () => set({ streak: 1 }),
       setSelectedDomain: (domain: string) => set({ selectedDomain: domain }),
       setCurrentSyllabus: (syllabus: DomainContent) => set({ currentSyllabus: syllabus }),
       setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),

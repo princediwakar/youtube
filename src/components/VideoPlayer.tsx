@@ -322,31 +322,33 @@ export default function VideoPlayer() {
         />
       )}
 
+      {/* Top Right Controls */}
+      {hasStarted && !currentQuestion && (
+        <div className={`absolute top-4 right-4 flex items-center gap-3 transition-opacity duration-300 z-20 ${(isPlaying && isMouseIdle) ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
+          <button 
+            onClick={toggleCaptions}
+            className={`w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transition-all border shadow-lg ${isCCOn ? 'bg-amber-500/20 text-amber-400 border-amber-500/50' : 'bg-black/40 hover:bg-black/80 text-white/70 hover:text-white border-white/10 hover:border-white/30'}`}
+            title="Toggle Captions (C)"
+          >
+            <Subtitles className="w-5 h-5" />
+          </button>
+          
+          <button 
+            onClick={toggleFullScreen}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md transition-all border border-white/10 hover:border-white/30 shadow-lg"
+            title="Full Screen (F)"
+          >
+            {isFullScreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+          </button>
+        </div>
+      )}
+
 
 
       {/* Custom Controls Overlay (Bottom Timeline) */}
       {hasStarted && !currentQuestion && (
         <div className={`absolute bottom-0 left-0 right-0 pb-0 pt-16 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 z-20 flex flex-col justify-end ${(isPlaying && isMouseIdle) ? 'opacity-0' : (isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100')}`}>
           
-          {/* Control Buttons */}
-          <div className="flex justify-end items-center gap-3 px-4 pb-2">
-            <button 
-              onClick={toggleCaptions}
-              className={`w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md transition-all border shadow-lg ${isCCOn ? 'bg-amber-500/20 text-amber-400 border-amber-500/50' : 'bg-black/40 hover:bg-black/80 text-white/70 hover:text-white border-white/10 hover:border-white/30'}`}
-              title="Toggle Captions (C)"
-            >
-              <Subtitles className="w-5 h-5" />
-            </button>
-            
-            <button 
-              onClick={toggleFullScreen}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/80 text-white backdrop-blur-md transition-all border border-white/10 hover:border-white/30 shadow-lg"
-              title="Full Screen (F)"
-            >
-              {isFullScreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-            </button>
-          </div>
-
           <div className="relative w-full h-10 group/scrub">
             {/* Fat-Finger Touch Target */}
             <input 
