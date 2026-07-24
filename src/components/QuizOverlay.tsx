@@ -13,7 +13,7 @@ interface QuizOverlayProps {
 }
 
 export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayProps) {
-  const { incrementMastery, isTutorModeActive, setIsTutorModeActive } = useStore();
+  const { incrementScore, isTutorModeActive, setIsTutorModeActive } = useStore();
   const [answer, setAnswer] = useState('');
   const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
 
@@ -23,7 +23,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
     const isCorrect = value === question.correctAnswer;
     if (isCorrect) {
       setStatus('correct');
-      incrementMastery();
+      incrementScore();
       setTimeout(() => onPass(), 1500);
     } else {
       setStatus('wrong');
@@ -47,7 +47,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
 
     if (isCorrect) {
       setStatus('correct');
-      incrementMastery();
+      incrementScore();
       setTimeout(() => onPass(), 1500);
     } else {
       setStatus('wrong');

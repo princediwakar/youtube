@@ -10,7 +10,8 @@ import { Play, Pause, AlertTriangle, RefreshCw, Maximize } from 'lucide-react';
 export default function VideoPlayer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
-  const { isFlowMode, selectedDomain, currentSyllabus } = useStore();
+  const { isFlowMode, selectedDomain, currentSyllabus, incrementScore } = useStore();
+  const watchTimeSeconds = useRef(0);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
   const [hasStarted, setHasStarted] = useState(false);
@@ -37,6 +38,12 @@ export default function VideoPlayer() {
 
     const interval = setInterval(async () => {
       if (playerRef.current && isPlaying) {
+        watchTimeSeconds.current += 1;
+        if (watchTimeSeconds.current >= 60) {
+          incrementScore();
+          watchTimeSeconds.current = 0;
+        }
+
         const time = await playerRef.current.getCurrentTime();
         if (time !== undefined) {
           const vidDuration = await playerRef.current.getDuration();

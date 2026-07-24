@@ -6,7 +6,7 @@ import VideoPlayer from '@/components/VideoPlayer';
 import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3 } from 'lucide-react';
 
 export default function ZenDashboard() {
-  const { masteryScore, setSelectedDomain, currentSyllabus } = useStore();
+  const { score, setSelectedDomain, currentSyllabus } = useStore();
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState('');
   const [isMouseIdle, setIsMouseIdle] = useState(false);
@@ -50,8 +50,8 @@ export default function ZenDashboard() {
         
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Mastery</span>
-            <span className="text-2xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">{masteryScore}</span>
+            <span className="text-xs text-slate-500 uppercase tracking-widest font-bold">Score</span>
+            <span className="text-2xl font-black text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)] flex items-center gap-1">{score}</span>
           </div>
         </div>
       </header>

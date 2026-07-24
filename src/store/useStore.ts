@@ -9,7 +9,7 @@ export interface ChatMessage {
 
 interface AppState {
   isFlowMode: boolean;
-  masteryScore: number;
+  score: number;
   selectedDomain: string | null;
   currentSyllabus: DomainContent | null;
   isGenerating: boolean;
@@ -18,8 +18,7 @@ interface AppState {
   tutorChatHistory: ChatMessage[];
   
   toggleFlowMode: () => void;
-  incrementMastery: () => void;
-  decrementMastery: () => void;
+  incrementScore: () => void;
   setSelectedDomain: (domain: string) => void;
   setCurrentSyllabus: (syllabus: DomainContent) => void;
   setIsGenerating: (isGenerating: boolean) => void;
@@ -33,7 +32,7 @@ export const useStore = create<AppState>()(
   persist(
     (set: any): AppState => ({
       isFlowMode: false,
-      masteryScore: 0,
+      score: 0,
       selectedDomain: null,
       currentSyllabus: null,
       isGenerating: false,
@@ -42,8 +41,7 @@ export const useStore = create<AppState>()(
       tutorChatHistory: [],
       
       toggleFlowMode: () => set((state: any) => ({ isFlowMode: !state.isFlowMode })),
-      incrementMastery: () => set((state: any) => ({ masteryScore: state.masteryScore + 10 })),
-      decrementMastery: () => set((state: any) => ({ masteryScore: Math.max(0, state.masteryScore - 5) })),
+      incrementScore: () => set((state: any) => ({ score: state.score + 1 })),
       setSelectedDomain: (domain: string) => set({ selectedDomain: domain }),
       setCurrentSyllabus: (syllabus: DomainContent) => set({ currentSyllabus: syllabus }),
       setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
