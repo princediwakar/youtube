@@ -27,7 +27,7 @@ export default function VideoPlayer() {
 
   // If in fallback mode, use a safe video ID
   const videoId = fallbackMode ? 'zjkBMFhNj_g' : (currentSyllabus?.videoId || 'zjkBMFhNj_g');
-  const mockQuestions = currentSyllabus?.questions || [];
+  const questions = currentSyllabus?.questions || [];
 
   // Polling for video time
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function VideoPlayer() {
           if (vidDuration) setProgress((time / vidDuration) * 100);
 
           // Trigger transition slightly earlier for the fade effect
-          const matchingQuestion = mockQuestions.find(
+          const matchingQuestion = questions.find(
             (q) => !answeredQuestions.has(q.id) && time >= q.timestamp - 2 && time < q.timestamp
           );
 
@@ -66,7 +66,7 @@ export default function VideoPlayer() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isFlowMode, currentQuestion, answeredQuestions, mockQuestions, hasStarted, isPlaying, duration]);
+  }, [isFlowMode, currentQuestion, answeredQuestions, questions, hasStarted, isPlaying, duration]);
 
   const onReady: YouTubeProps['onReady'] = (event: any) => {
     playerRef.current = event.target;
@@ -92,13 +92,19 @@ export default function VideoPlayer() {
   // Auto-start countdown logic
   useEffect(() => {
     if (hasStarted || hasError || !isPlayerReady) return;
+
+    if (questions.length === 0) {
+      handleStartSession();
+      return;
+    }
+
     if (autoStartCountdown <= 0) {
       handleStartSession();
       return;
     }
     const timer = setTimeout(() => setAutoStartCountdown(c => c - 1), 1000);
     return () => clearTimeout(timer);
-  }, [autoStartCountdown, hasStarted, hasError, isPlayerReady]);
+  }, [autoStartCountdown, hasStarted, hasError, isPlayerReady, questions.length]);
 
   const handleFallback = () => {
     setFallbackMode(true);
@@ -129,6 +135,69 @@ export default function VideoPlayer() {
       playerRef.current.playVideo();
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      // Don't trigger shortcuts if user is typing in an input or textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' || 
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.getAttribute('contenteditable') === 'true'
+      ) {
+        return;
+      }
+      
+      if (!playerRef.current || !hasStarted || currentQuestion) return;
+
+      switch (e.key.toLowerCase()) {
+        case ' ':
+        case 'k': {
+          e.preventDefault();
+          const state = await playerRef.current.getPlayerState();
+          if (state === 1) playerRef.current.pauseVideo();
+          else playerRef.current.playVideo();
+          break;
+        }
+        case 'f': {
+          e.preventDefault();
+          toggleFullScreen();
+          break;
+        }
+        case 'arrowright':
+        case 'l': {
+          e.preventDefault();
+          const time = await playerRef.current.getCurrentTime();
+          playerRef.current.seekTo(time + 10, true);
+          break;
+        }
+        case 'arrowleft':
+        case 'j': {
+          e.preventDefault();
+          const time = await playerRef.current.getCurrentTime();
+          playerRef.current.seekTo(Math.max(0, time - 10), true);
+          break;
+        }
+        case 'c': {
+          e.preventDefault();
+          try {
+            playerRef.current.loadModule('captions');
+            const currentTrack = await playerRef.current.getOption('captions', 'track');
+            if (currentTrack && currentTrack.languageCode) {
+              playerRef.current.setOption('captions', 'track', {}); // disable
+            } else {
+              playerRef.current.setOption('captions', 'track', { languageCode: 'en' }); // enable english
+            }
+          } catch (err) {
+            console.log('Captions toggle failed', err);
+          }
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [hasStarted, currentQuestion]);
 
   const togglePlay = () => {
     if (!playerRef.current) return;
@@ -230,7 +299,7 @@ export default function VideoPlayer() {
             </div>
 
             {/* Checkpoint Markers */}
-            {duration > 0 && mockQuestions.map(q => (
+            {duration > 0 && questions.map(q => (
               <div 
                 key={q.id}
                 className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full shadow-[0_0_8px_var(--color-theme-primary)] transition-colors z-20 pointer-events-none ${answeredQuestions.has(q.id) ? 'bg-emerald-400' : 'bg-amber-400'}`}
@@ -242,7 +311,7 @@ export default function VideoPlayer() {
       )}
 
       {/* Mission Briefing Overlay */}
-      {!hasStarted && !hasError && (
+      {!hasStarted && !hasError && questions.length > 0 && (
         <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md z-20 flex flex-col items-center justify-center p-8 animate-fade-in">
           <div className="max-w-md w-full bg-slate-900/50 border border-slate-700/50 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-theme-primary)] opacity-10 blur-3xl rounded-full" />
@@ -253,7 +322,7 @@ export default function VideoPlayer() {
               {selectedDomain ? selectedDomain.replace('-', ' ') : 'Coding'} Mastery
             </h2>
             <p className="text-slate-400 mb-8">
-              This module contains <strong className="text-white">{mockQuestions.length} conceptual checkpoints</strong>. 
+              This module contains <strong className="text-white">{questions.length} conceptual checkpoints</strong>. 
               The engine will automatically pause to test your recall.
             </p>
             

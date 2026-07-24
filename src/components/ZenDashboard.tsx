@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { useStore } from '@/store/useStore';
 import VideoPlayer from '@/components/VideoPlayer';
-import {  Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3 } from 'lucide-react';
+import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3 } from 'lucide-react';
 
 export default function ZenDashboard() {
   const { isFlowMode, toggleFlowMode, masteryScore, setSelectedDomain, currentSyllabus } = useStore();
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState('');
   
-  const mockQuestions = currentSyllabus?.questions || [];
+  const questions = currentSyllabus?.questions || [];
 
   useEffect(() => {
     setMounted(true);
@@ -83,9 +83,9 @@ export default function ZenDashboard() {
                     <Focus className="w-4 h-4 text-[var(--color-theme-primary)]" />
                     Concept Checkpoints
                   </h4>
-                  {mockQuestions.length > 0 ? (
+                  {questions.length > 0 ? (
                     <div className="space-y-4 relative before:absolute before:inset-y-2 before:left-[11px] before:w-[2px] before:bg-slate-800">
-                      {mockQuestions.map((q, i) => (
+                      {questions.map((q, i) => (
                         <div key={q.id} className="flex items-start gap-4 relative z-10">
                           <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-[#020617] border border-slate-700 mt-0.5">
                             <Circle className="w-2.5 h-2.5 text-slate-500" />
