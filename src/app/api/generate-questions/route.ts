@@ -45,6 +45,7 @@ export async function POST(req: Request) {
         "videoId": "${videoId}",
         "title": "Mastery Track: ${query || title}",
         "summaryNotes": "3-8 short bullet points summarizing the video based on the transcript snippet provided. Use plain text with bullets (-).",
+        "nextRecommendedQuery": "A short, related search query (1-4 words) that the user should explore next to further their mastery of this topic.",
         "questions": [
           {
             "id": "q1",

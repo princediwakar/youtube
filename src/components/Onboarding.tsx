@@ -25,7 +25,7 @@ const searchSuggestions = [
 export default function Onboarding() {
   const { setSelectedDomain, currentSyllabus, setCurrentSyllabus, setIsGenerating, setTheme, theme, isGenerating } = useStore();
   const [step, setStep] = useState<1 | 2>(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(currentSyllabus?.nextRecommendedQuery || '');
   const [errorMsg, setErrorMsg] = useState('');
 
   const [searchStatus, setSearchStatus] = useState<'idle' | 'searching' | 'found'>('idle');

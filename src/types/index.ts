@@ -14,5 +14,6 @@ export interface DomainContent {
   videoId: string;
   title?: string;
   summaryNotes?: string;
+  nextRecommendedQuery?: string;
   questions: Question[];
 }
