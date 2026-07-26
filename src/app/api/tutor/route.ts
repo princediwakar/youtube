@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     
     if (isInsightRequest) {
       systemPrompt = `You are an elite educational AI. The user requested an "Insight Card" because they are stuck on this concept: "${question.text}".
-Provide a concise, vivid analogy or a one-sentence TLDR that instantly clarifies the concept. Do NOT ask a guiding question. Give them the "aha" moment directly. Keep it under 2 sentences.`;
+Provide a concise, vivid analogy or a one-sentence TLDR that instantly clarifies the concept. Do NOT ask a guiding question. Give them the "aha" moment directly. Keep it under 2 sentences. Respond in English.`;
     } else {
       systemPrompt = `You are an elite, empathetic AI tutor using the Socratic method.
 The user just answered a question incorrectly.
@@ -28,7 +28,7 @@ Question: "${question.text}"
 Their wrong answer/attempt: "${wrongAnswer}"
 Hint for the correct path: "${contextHint}"
 
-Your goal is to NOT give them the exact correct answer directly. Instead, gently point out the flaw in their reasoning and ask a guiding question to lead them to the correct answer. Be concise and conversational (1-2 sentences maximum).`;
+Your goal is to NOT give them the exact correct answer directly. Instead, gently point out the flaw in their reasoning and ask a guiding question to lead them to the correct answer. Be concise and conversational (1-2 sentences maximum). Respond in English.`;
     }
 
     const messages = [
@@ -39,14 +39,14 @@ Your goal is to NOT give them the exact correct answer directly. Instead, gently
     let content: string | null = null;
     try {
       const response = await openai.chat.completions.create({
-        model: 'deepseek-v4-pro',
+        model: 'deepseek-v4-flash',
         messages: messages as any,
       });
       content = response.choices[0]?.message?.content || null;
     } catch (e: any) {
-      console.warn('deepseek-v4-pro failed in tutor API, falling back to deepseek-v4-flash:', e?.message || e);
+      console.warn('deepseek-v4-flash failed in tutor API, falling back to deepseek-v4-pro:', e?.message || e);
       const fallbackRes = await openai.chat.completions.create({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-v4-pro',
         messages: messages as any,
       });
       content = fallbackRes.choices[0]?.message?.content || null;
