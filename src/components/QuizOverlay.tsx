@@ -13,7 +13,7 @@ interface QuizOverlayProps {
 }
 
 export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayProps) {
-  const { incrementScore, isTutorModeActive, setIsTutorModeActive } = useStore();
+  const { incrementScore, isTutorModeActive, setIsTutorModeActive, clearTutorChat } = useStore();
   const [answer, setAnswer] = useState('');
   const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
 
@@ -26,6 +26,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
       incrementScore();
       setTimeout(() => onPass(), 1500);
     } else {
+      clearTutorChat();
       setStatus('wrong');
       setIsTutorModeActive(true);
     }
@@ -33,6 +34,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
 
   const handleDecodeRequest = () => {
     if (status !== 'idle') return;
+    clearTutorChat();
     setAnswer("User requested insight card");
     setStatus('wrong');
     setIsTutorModeActive(true);
@@ -50,6 +52,7 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
       incrementScore();
       setTimeout(() => onPass(), 1500);
     } else {
+      clearTutorChat();
       setStatus('wrong');
       setIsTutorModeActive(true);
     }

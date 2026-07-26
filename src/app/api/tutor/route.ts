@@ -7,6 +7,7 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
+  let isInsightRequest = false;
   try {
     const { chatHistory, question, wrongAnswer, contextHint } = await req.json();
 
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    const isInsightRequest = wrongAnswer === "User requested insight card";
+    isInsightRequest = wrongAnswer === "User requested insight card";
     let systemPrompt = '';
     
     if (isInsightRequest) {
@@ -35,16 +36,33 @@ Your goal is to NOT give them the exact correct answer directly. Instead, gently
       ...chatHistory
     ];
 
-    const response = await openai.chat.completions.create({
-      model: 'deepseek-chat',
-      messages: messages as any,
-    });
+    let content: string | null = null;
+    try {
+      const response = await openai.chat.completions.create({
+        model: 'deepseek-v4-pro',
+        messages: messages as any,
+      });
+      content = response.choices[0]?.message?.content || null;
+    } catch (e: any) {
+      console.warn('deepseek-v4-pro failed in tutor API, falling back to deepseek-v4-flash:', e?.message || e);
+      const fallbackRes = await openai.chat.completions.create({
+        model: 'deepseek-v4-flash',
+        messages: messages as any,
+      });
+      content = fallbackRes.choices[0]?.message?.content || null;
+    }
 
-    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("Failed to generate response from AI tutor.");
+    }
 
     return NextResponse.json({ content });
   } catch (error: any) {
     console.error('Error in tutor API:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const fallbackMessage = isInsightRequest 
+      ? "Here is a quick insight: Break this concept down into its core components and consider how they interact in the video example."
+      : "Let's rethink this step by step. What key assumption in your answer might conflict with what was just explained in the video?";
+    return NextResponse.json({ content: fallbackMessage }, { status: 200 });
   }
 }
+

@@ -43,9 +43,19 @@ export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onRes
       const data = await response.json();
       if (data.content) {
         addTutorMessage({ role: 'assistant', content: data.content });
+      } else {
+        console.error('Tutor API Error:', data.error || 'Unknown error');
+        const fallback = isInsightRequest 
+          ? "Here is a quick insight: Break this concept down into its core components and consider how they interact in the video example."
+          : "Let's rethink this step by step. What key assumption in your answer might conflict with what was just explained in the video?";
+        addTutorMessage({ role: 'assistant', content: fallback });
       }
     } catch (error) {
       console.error('Failed to communicate with Tutor AI:', error);
+      const fallback = isInsightRequest 
+        ? "Here is a quick insight: Break this concept down into its core components and consider how they interact in the video example."
+        : "Let's rethink this step by step. What key assumption in your answer might conflict with what was just explained in the video?";
+      addTutorMessage({ role: 'assistant', content: fallback });
     } finally {
       setIsLoading(false);
     }
@@ -92,6 +102,15 @@ export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onRes
               <span className="text-red-400">Your answer:</span>
               <span className="text-white px-2 py-1 bg-black/30 rounded">{wrongAnswer}</span>
             </div>
+          </div>
+        )}
+
+        {/* Loading state for Insight mode */}
+        {isInsightRequest && tutorChatHistory.length === 0 && isLoading && (
+          <div className="p-8 rounded-3xl bg-[var(--color-theme-primary)]/10 border border-[var(--color-theme-primary)]/30 text-white flex flex-col items-center justify-center min-h-[200px] animate-pulse my-4">
+            <Lightbulb className="w-10 h-10 text-[var(--color-theme-primary)] mb-4 animate-bounce" />
+            <p className="text-lg font-bold text-white mb-1">Generating Concept Insight...</p>
+            <p className="text-sm text-slate-400 text-center">Analyzing video context and creating an instant analogy for you.</p>
           </div>
         )}
 
