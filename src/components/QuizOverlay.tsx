@@ -10,9 +10,10 @@ interface QuizOverlayProps {
   question: Question;
   onPass: () => void;
   onSkip: () => void;
+  onRemediate?: (timestamp: number) => void;
 }
 
-export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayProps) {
+export default function QuizOverlay({ question, onPass, onSkip, onRemediate }: QuizOverlayProps) {
   const { incrementScore, isTutorModeActive, setIsTutorModeActive, clearTutorChat } = useStore();
   const [answer, setAnswer] = useState('');
   const [status, setStatus] = useState<'idle' | 'wrong' | 'correct'>('idle');
@@ -87,6 +88,10 @@ export default function QuizOverlay({ question, onPass, onSkip }: QuizOverlayPro
         onResumeVideo={() => {
           setIsTutorModeActive(false);
           onSkip();
+        }}
+        onRemediate={(timestamp) => {
+          setIsTutorModeActive(false);
+          if (onRemediate) onRemediate(timestamp);
         }}
       />
     );

@@ -39,12 +39,12 @@ Your goal is to NOT give them the exact correct answer directly. Instead, gently
     let content: string | null = null;
     try {
       const response = await openai.chat.completions.create({
-        model: 'deepseek-v4-flash',
+        model: 'deepseek-v4-pro',
         messages: messages as any,
       });
       content = response.choices[0]?.message?.content || null;
     } catch (e: any) {
-      console.warn('deepseek-v4-flash failed in tutor API, falling back to deepseek-v4-pro:', e?.message || e);
+      console.warn('deepseek-v4-pro failed in tutor API, falling back to deepseek-v4-pro:', e?.message || e);
       const fallbackRes = await openai.chat.completions.create({
         model: 'deepseek-v4-pro',
         messages: messages as any,

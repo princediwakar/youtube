@@ -8,7 +8,11 @@ import QuizOverlay from '@/components/QuizOverlay';
 import SessionComplete from '@/components/SessionComplete';
 import { Play, Pause, Maximize, Minimize, Subtitles } from 'lucide-react';
 
-export default function VideoPlayer() {
+interface VideoPlayerProps {
+  onSessionComplete?: () => void;
+}
+
+export default function VideoPlayer({ onSessionComplete }: VideoPlayerProps = {}) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
   const { isFlowMode, selectedDomain, currentSyllabus, incrementScore } = useStore();
@@ -21,6 +25,8 @@ export default function VideoPlayer() {
   const [autoStartCountdown, setAutoStartCountdown] = useState(4);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isTransitioningRef = useRef(false);
+  const fadeOutIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Custom Control State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -40,13 +46,13 @@ export default function VideoPlayer() {
   const videoId = fallbackMode ? 'zjkBMFhNj_g' : frozenVideoId.current;
   const questions = currentSyllabus?.questions || [];
 
-  // Polling for video time
+  // High-precision polling for video time (250ms interval)
   useEffect(() => {
     if (isFlowMode || currentQuestion || !hasStarted) return;
 
     const interval = setInterval(async () => {
       if (playerRef.current && isPlaying) {
-        watchTimeSeconds.current += 1;
+        watchTimeSeconds.current += 0.25;
         if (watchTimeSeconds.current >= 60) {
           incrementScore();
           watchTimeSeconds.current = 0;
@@ -58,32 +64,47 @@ export default function VideoPlayer() {
           if (vidDuration && vidDuration !== duration) setDuration(vidDuration);
           if (vidDuration) setProgress((time / vidDuration) * 100);
 
-          // Trigger transition slightly earlier for the fade effect
-          const matchingQuestion = questions.find(
-            (q) => !answeredQuestions.has(q.id) && time >= q.timestamp - 2 && time < q.timestamp
-          );
+          // Trigger transition cleanly when approaching or reaching the checkpoint window [-1.5s, +3.0s]
+          if (!isTransitioningRef.current) {
+            const matchingQuestion = questions.find(
+              (q) => !answeredQuestions.has(q.id) && time >= q.timestamp - 1.5 && time <= q.timestamp + 3.0
+            );
 
-          if (matchingQuestion) {
-            // Cinematic Transition: Duck volume then pause
-            let volume = await playerRef.current.getVolume();
-            const fadeOutInterval = setInterval(() => {
-              if (volume > 10) {
-                volume -= 10;
-                playerRef.current.setVolume(volume);
-              } else {
-                clearInterval(fadeOutInterval);
-                playerRef.current.pauseVideo();
-                playerRef.current.setVolume(100); // reset for when it resumes
-                setCurrentQuestion(matchingQuestion);
-              }
-            }, 100);
+            if (matchingQuestion) {
+              isTransitioningRef.current = true;
+              // Snappy Cinematic Transition: Fast volume ducking (50ms interval) then pause right at timestamp
+              let volume = await playerRef.current.getVolume();
+              if (fadeOutIntervalRef.current) clearInterval(fadeOutIntervalRef.current);
+              fadeOutIntervalRef.current = setInterval(() => {
+                if (volume > 20 && playerRef.current) {
+                  volume -= 20;
+                  playerRef.current.setVolume(volume);
+                } else {
+                  if (fadeOutIntervalRef.current) clearInterval(fadeOutIntervalRef.current);
+                  fadeOutIntervalRef.current = null;
+                  if (playerRef.current) {
+                    playerRef.current.pauseVideo();
+                    playerRef.current.setVolume(100); // reset for when it resumes
+                  }
+                  setCurrentQuestion(matchingQuestion);
+                  isTransitioningRef.current = false;
+                }
+              }, 50);
+            }
           }
         }
       }
-    }, 1000);
+    }, 250);
 
-    return () => clearInterval(interval);
-  }, [isFlowMode, currentQuestion, answeredQuestions, questions, hasStarted, isPlaying, duration]);
+    return () => {
+      clearInterval(interval);
+      if (fadeOutIntervalRef.current) {
+        clearInterval(fadeOutIntervalRef.current);
+        fadeOutIntervalRef.current = null;
+      }
+      isTransitioningRef.current = false;
+    };
+  }, [isFlowMode, currentQuestion, answeredQuestions, questions, hasStarted, isPlaying, duration, incrementScore]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -107,9 +128,12 @@ export default function VideoPlayer() {
     if (event.data === 1) setIsPlaying(true);
     else if (event.data === 2 || event.data === 0) {
       setIsPlaying(false);
-      if (event.data === 0) setSessionComplete(true);
+      if (event.data === 0) {
+        setSessionComplete(true);
+        onSessionComplete?.();
+      }
     }
-  }, []);
+  }, [onSessionComplete]);
 
   const onError: YouTubeProps['onError'] = React.useCallback((event: any) => {
     // Error code 150/101 = video embedding disabled by owner → switch to fallback
@@ -380,8 +404,13 @@ export default function VideoPlayer() {
             {duration > 0 && questions.map(q => (
               <div 
                 key={q.id}
-                className={`absolute bottom-0 w-2.5 h-2.5 rounded-full shadow-[0_0_8px_var(--color-theme-primary)] transition-colors z-20 pointer-events-none ${answeredQuestions.has(q.id) ? 'bg-emerald-400' : 'bg-amber-400'}`}
-                style={{ left: `calc(${(q.timestamp / duration) * 100}% - 5px)` }}
+                title={`Flashpoint: ${q.text}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (playerRef.current) playerRef.current.seekTo(Math.max(0, q.timestamp - 2), true);
+                }}
+                className={`absolute bottom-0 w-3 h-3 rounded-full shadow-[0_0_10px_var(--color-theme-primary)] transition-all z-20 cursor-pointer hover:scale-150 ${answeredQuestions.has(q.id) ? 'bg-emerald-400 shadow-emerald-400/50' : 'bg-amber-400 shadow-amber-400/50 animate-pulse'}`}
+                style={{ left: `calc(${(q.timestamp / duration) * 100}% - 6px)` }}
               />
             ))}
           </div>
@@ -422,6 +451,7 @@ export default function VideoPlayer() {
             question={currentQuestion} 
             onPass={() => handleQuizPass(currentQuestion.id)} 
             onSkip={() => handleSkip(currentQuestion.id)}
+            onRemediate={(remediationTimestamp) => handleRemediation(remediationTimestamp)}
           />
         </div>
       )}

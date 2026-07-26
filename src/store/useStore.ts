@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DomainContent } from '@/types';
+import { DomainContent, WatchedVideo } from '@/types';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -18,7 +18,8 @@ interface AppState {
   theme: string;
   isTutorModeActive: boolean;
   tutorChatHistory: ChatMessage[];
-  
+  watchHistory: WatchedVideo[];
+
   toggleFlowMode: () => void;
   incrementScore: () => void;
   incrementStreak: () => void;
@@ -31,6 +32,7 @@ interface AppState {
   setIsTutorModeActive: (active: boolean) => void;
   addTutorMessage: (message: ChatMessage) => void;
   clearTutorChat: () => void;
+  addWatchedVideo: (video: WatchedVideo) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -46,7 +48,8 @@ export const useStore = create<AppState>()(
       theme: 'star-chart',
       isTutorModeActive: false,
       tutorChatHistory: [],
-      
+      watchHistory: [],
+
       toggleFlowMode: () => set((state: any) => ({ isFlowMode: !state.isFlowMode })),
       incrementScore: () => set((state: any) => ({ score: state.score + 1 })),
       incrementStreak: () => set((state: any) => ({ streak: state.streak + 1 })),
@@ -59,6 +62,14 @@ export const useStore = create<AppState>()(
       setIsTutorModeActive: (active: boolean) => set({ isTutorModeActive: active }),
       addTutorMessage: (message: ChatMessage) => set((state: any) => ({ tutorChatHistory: [...state.tutorChatHistory, message] })),
       clearTutorChat: () => set({ tutorChatHistory: [] }),
+      addWatchedVideo: (video: WatchedVideo) =>
+        set((state: any) => ({
+          // Prepend and deduplicate by videoId — most recent watch wins
+          watchHistory: [
+            video,
+            ...(state.watchHistory || []).filter((v: WatchedVideo) => v.videoId !== video.videoId),
+          ].slice(0, 50), // cap at 50 entries
+        })),
     }),
     {
       name: 'zentube-storage',

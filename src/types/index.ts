@@ -17,3 +17,13 @@ export interface DomainContent {
   nextRecommendedQuery?: string;
   questions: Question[];
 }
+
+export interface WatchedVideo {
+  videoId: string;
+  title: string;
+  query: string;
+  watchedAt: number;        // unix ms timestamp
+  notes: string;            // user-typed + AI summary notes saved at session end
+  summaryNotes?: string;    // AI-generated summary
+  nextRecommendedQuery?: string;
+}

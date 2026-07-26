@@ -3,14 +3,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import VideoPlayer from '@/components/VideoPlayer';
-import { Focus, Play, ChevronLeft, Award, Activity, CheckCircle2, Circle, Edit3, Loader2, Flame } from 'lucide-react';
+import { ChevronLeft, Loader2, Flame } from 'lucide-react';
 
 export default function ZenDashboard() {
-  const { score, streak, setSelectedDomain, currentSyllabus, isGeneratingQuestions } = useStore();
+  const { score, streak, setSelectedDomain, currentSyllabus, isGeneratingQuestions, addWatchedVideo, selectedDomain } = useStore();
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState('');
   const [isMouseIdle, setIsMouseIdle] = useState(false);
   const hideCursorTimeout = useRef<NodeJS.Timeout | null>(null);
+  // Keep a ref so the callback always sees the latest notes without re-creating VideoPlayer
+  const notesRef = useRef(notes);
+  useEffect(() => { notesRef.current = notes; }, [notes]);
 
   const handleMouseMove = () => {
     setIsMouseIdle(false);
@@ -19,7 +22,7 @@ export default function ZenDashboard() {
       setIsMouseIdle(true);
     }, 2000);
   };
-  
+
   const questions = currentSyllabus?.questions || [];
 
   useEffect(() => {
@@ -32,11 +35,27 @@ export default function ZenDashboard() {
     }
   }, [currentSyllabus?.summaryNotes]);
 
+  // Called by VideoPlayer when the video ends (state 0)
+  const handleSessionComplete = () => {
+    if (!currentSyllabus) return;
+    const combinedNotes = notesRef.current ||
+      currentSyllabus.summaryNotes || '';
+    addWatchedVideo({
+      videoId: currentSyllabus.videoId,
+      title: currentSyllabus.title || 'Untitled Video',
+      query: selectedDomain?.replace(/-/g, ' ') || currentSyllabus.title || '',
+      watchedAt: Date.now(),
+      notes: combinedNotes,
+      summaryNotes: currentSyllabus.summaryNotes,
+      nextRecommendedQuery: currentSyllabus.nextRecommendedQuery,
+    });
+  };
+
   if (!mounted) return null;
 
   return (
-    <div 
-      className="min-h-screen bg-[var(--color-theme-bg)] transition-colors duration-1000 p-4 md:p-8 flex flex-col font-sans" 
+    <div
+      className="min-h-screen bg-[var(--color-theme-bg)] transition-colors duration-1000 p-4 md:p-8 flex flex-col font-sans"
       style={{ backgroundColor: 'var(--color-theme-bg, #020617)' }}
       onMouseMove={handleMouseMove}
     >
@@ -45,7 +64,7 @@ export default function ZenDashboard() {
 
       <header className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 max-w-[1600px] mx-auto w-full">
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => setSelectedDomain('')}
             className={`p-2 text-slate-400 hover:text-white transition-all duration-300 hover:-translate-x-1 ${isMouseIdle ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             title="Return to Dashboard"
@@ -53,7 +72,7 @@ export default function ZenDashboard() {
             <ChevronLeft className="w-8 h-8" />
           </button>
         </div>
-        
+
         <div className="flex items-center gap-8">
           {isGeneratingQuestions && (
             <div className="flex items-center gap-2 text-slate-400 bg-slate-800/30 px-3 py-1.5 rounded-full border border-slate-700/50 animate-fade-in">
@@ -85,10 +104,10 @@ export default function ZenDashboard() {
       <main className="relative z-10 grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-[1600px] mx-auto w-full animate-fade-in">
         <div className="lg:col-span-3 relative group">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800/80 ring-1 ring-white/5 bg-black">
-            <VideoPlayer />
+            <VideoPlayer onSessionComplete={handleSessionComplete} />
           </div>
         </div>
-        
+
         <aside className="lg:col-span-1 flex flex-col">
           {/* Study Notes */}
           <div className="flex-1 p-6 rounded-3xl bg-slate-800/20 backdrop-blur-2xl border border-slate-700/50 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col min-h-[250px] animate-fade-in relative overflow-hidden group">
@@ -105,7 +124,7 @@ export default function ZenDashboard() {
                   </div>
                 </div>
               )}
-              <textarea 
+              <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="flex-1 w-full bg-transparent resize-none outline-none text-slate-300 text-sm placeholder-transparent font-mono leading-relaxed p-4 z-10 relative"

@@ -8,9 +8,10 @@ interface TutorModeProps {
   wrongAnswer: string;
   onReturnToQuiz: () => void;
   onResumeVideo: () => void;
+  onRemediate?: (timestamp: number) => void;
 }
 
-export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onResumeVideo }: TutorModeProps) {
+export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onResumeVideo, onRemediate }: TutorModeProps) {
   const { tutorChatHistory, addTutorMessage, clearTutorChat } = useStore();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -79,16 +80,30 @@ export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onRes
           {isInsightRequest ? <Lightbulb className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
           {isInsightRequest ? 'Concept Insight' : 'Guided Tutor'}
         </h3>
-        <button 
-          onClick={() => {
-            clearTutorChat();
-            onReturnToQuiz();
-          }}
-          className="text-sm px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center gap-2 transition-all"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Return to Quiz
-        </button>
+        <div className="flex items-center gap-2">
+          {onRemediate && question.remediationTimestamp !== undefined && (
+            <button 
+              onClick={() => {
+                clearTutorChat();
+                onRemediate(question.remediationTimestamp!);
+              }}
+              className="text-xs px-3.5 py-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 font-bold transition-all shadow-sm"
+              title={`Rewind video to ${Math.floor(question.remediationTimestamp / 60)}:${(question.remediationTimestamp % 60).toString().padStart(2, '0')} to review concept`}
+            >
+              Rewind & Review ({Math.floor(question.remediationTimestamp / 60)}:${(question.remediationTimestamp % 60).toString().padStart(2, '0')})
+            </button>
+          )}
+          <button 
+            onClick={() => {
+              clearTutorChat();
+              onReturnToQuiz();
+            }}
+            className="text-sm px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center gap-2 transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Return to Quiz
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4">
@@ -123,15 +138,28 @@ export default function TutorMode({ question, wrongAnswer, onReturnToQuiz, onRes
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-theme-primary)] opacity-20 blur-3xl rounded-full" />
                   <p className="relative z-10">{msg.content}</p>
                   
-                  <button 
-                    onClick={() => {
-                      clearTutorChat();
-                      onResumeVideo();
-                    }}
-                    className="relative z-10 mt-6 px-6 py-3 bg-[var(--color-theme-primary)] text-slate-900 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-lg cursor-pointer"
-                  >
-                    <Play className="w-5 h-5" /> Got it, resume video
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3 mt-6">
+                    <button 
+                      onClick={() => {
+                        clearTutorChat();
+                        onResumeVideo();
+                      }}
+                      className="relative z-10 px-6 py-3 bg-[var(--color-theme-primary)] text-slate-900 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-lg cursor-pointer"
+                    >
+                      <Play className="w-5 h-5" /> Got it, resume video
+                    </button>
+                    {onRemediate && question.remediationTimestamp !== undefined && (
+                      <button 
+                        onClick={() => {
+                          clearTutorChat();
+                          onRemediate(question.remediationTimestamp!);
+                        }}
+                        className="relative z-10 px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-lg cursor-pointer text-sm"
+                      >
+                        Rewind & Review Section ({Math.floor(question.remediationTimestamp / 60)}:${(question.remediationTimestamp % 60).toString().padStart(2, '0')})
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4 mt-6">
                   <div className="h-px bg-slate-800 flex-1"></div>
